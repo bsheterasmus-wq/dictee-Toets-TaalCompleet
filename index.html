@@ -146,6 +146,25 @@ input[type=password]:focus { border-color:var(--blue); background:#f0f7ff; }
     </div>
   </div>
 
+  <div class="card" id="jsonbin-card" style="display:none">
+    <h2>&#9881;&#65039; Online opslag instellen</h2>
+    <div id="jsonbin-alert" class="alert hidden"></div>
+    <p style="font-size:.88rem;color:var(--gray);font-weight:600;margin-bottom:14px">Vul je JSONBin gegevens in om dictees online op te slaan. Zo zien alle collega's en browsers dezelfde dictees.</p>
+    <div class="field-row">
+      <label class="field-label">BIN ID</label>
+      <input type="text" id="jb-bin-id" placeholder="bijv. 6789abc123def456..." maxlength="40">
+    </div>
+    <div class="field-row">
+      <label class="field-label">API Key</label>
+      <input type="text" id="jb-api-key" placeholder="bijv. $2b$10$..." maxlength="120">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-blue" onclick="saveJsonBinSettings()">&#128279; Verbinding maken</button>
+      <button class="btn btn-outline" onclick="clearJsonBinSettings()">&#10006; Verwijderen</button>
+    </div>
+    <div id="jb-status" style="margin-top:12px;font-size:.85rem;font-weight:700;color:var(--gray);text-align:center"></div>
+  </div>
+
   <div class="card">
     <h2>&#128193; Opgeslagen dictees</h2>
     <div id="saved-list"></div>
@@ -156,7 +175,7 @@ input[type=password]:focus { border-color:var(--blue); background:#f0f7ff; }
         <input type="file" id="import-file" accept=".json" onchange="importDictees(event)" style="display:none">
       </label>
     </div>
-    <p style="font-size:.78rem;color:var(--gray);font-weight:600;margin-top:8px;text-align:center">&#128161; Exporteer in Chrome, importeer in Edge — en andersom</p>
+    <p style="font-size:.78rem;color:var(--gray);font-weight:600;margin-top:8px;text-align:center" id="sync-hint"></p>
   </div>
 </div>
 
@@ -166,7 +185,12 @@ input[type=password]:focus { border-color:var(--blue); background:#f0f7ff; }
     <h2>&#127978; Kies een dictee</h2>
     <div id="student-list"></div>
     <div id="start-row" class="hidden" style="margin-top:16px">
-      <button class="btn btn-blue" style="width:100%;font-size:1.2rem" onclick="startDictee()">&#9654; Dictee starten</button>
+      <button class="btn btn-blue" style="width:100%;font-size:1.3rem;padding:16px" onclick="startDictee()">&#9654;&#65039; Dictee starten</button>
+      <div style="background:#fef3c7;border-radius:14px;padding:12px 16px;margin-top:12px;display:flex;align-items:center;gap:12px">
+        <label style="font-weight:700;color:#92400e;font-size:.9rem;white-space:nowrap">&#128266; Snelheid</label>
+        <input type="range" id="student-speed" min="0.4" max="1.0" step="0.05" value="1.0" oninput="updateStudentSpeed()" style="flex:1;accent-color:#fbbf24">
+        <span style="font-family:Fredoka One,cursive;color:#b45309;min-width:70px;text-align:right;font-size:1rem" id="student-speed-val">Snel</span>
+      </div>
     </div>
   </div>
 
@@ -177,6 +201,11 @@ input[type=password]:focus { border-color:var(--blue); background:#f0f7ff; }
     <div class="word-hint">Druk op de knop om het woord te horen</div>
     <button class="speak-btn" id="speak-btn" onclick="speakWord()">&#128266;</button>
     <div class="speak-lbl" id="speak-lbl">Klik om het woord te horen</div>
+    <div style="background:#fef3c7;border-radius:14px;padding:10px 16px;margin:12px 0;display:flex;align-items:center;gap:12px">
+      <label style="font-weight:700;color:#92400e;font-size:.9rem;white-space:nowrap">&#128266; Snelheid</label>
+      <input type="range" id="player-speed" min="0.4" max="1.0" step="0.05" value="1.0" oninput="updatePlayerSpeed()" style="flex:1;accent-color:#fbbf24">
+      <span style="font-family:Fredoka One,cursive;color:#b45309;min-width:70px;text-align:right;font-size:1rem" id="player-speed-val">Snel</span>
+    </div>
     <div class="player-nav">
       <button class="nbtn nprev" id="nav-prev" onclick="prevWord()">&#8592; Vorige</button>
       <button class="nbtn nnext" id="nav-next" onclick="nextWord()">Volgende &#8594;</button>
@@ -245,11 +274,210 @@ var currentIndex = 0;
 var selectedId = null;
 var editingId = null;
 
+var JB_KEY = 'jsonbin_v1';
+
+function getJbConfig() {
+  // Vaste verbinding - hoeft niet ingesteld te worden
+  return { binId: '69aebe45d0ea881f40003428', apiKey: '$2a$10$RLtKp3BpaiUi6TqRsnW.3.C3zkJfGzSWGwFXg2GOrjBbwGMJpcjf6' };
+}
+
+function sortDictees() {
+  dictees.sort(function(a, b) { return a.title.localeCompare(b.title, "nl", {sensitivity: "base"}); });
+}
+
 function loadAll() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
   catch(e) { return []; }
 }
-function saveAll() { localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees)); }
+
+function saveAll() {
+  sortDictees();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
+  var cfg = getJbConfig();
+  if (cfg) pushToJsonBin(cfg);
+}
+
+function pushToJsonBin(cfg) {
+  fetch('https://api.jsonbin.io/v3/b/' + cfg.binId, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': cfg.apiKey },
+    body: JSON.stringify(dictees)
+  }).catch(function(e) { console.warn('JSONBin sync failed', e); });
+}
+
+function fetchFromJsonBin(cfg, onDone) {
+  setJbStatus('⏳ Verbinding maken...', 'var(--gray)');
+  showAlert('jsonbin-alert', '⏳ Bezig met verbinden...', 'green');
+  fetch('https://api.jsonbin.io/v3/b/' + cfg.binId + '/latest', {
+    headers: { 'X-Master-Key': cfg.apiKey, 'X-Bin-Meta': 'false' }
+  })
+  .then(function(r) {
+    if (r.status === 401) throw new Error('API Key klopt niet (401). Gebruik de „X-Master-Key” uit het API Keys menu.');
+    if (r.status === 404) throw new Error('BIN ID niet gevonden (404). Controleer het BIN ID.');
+    if (r.status === 403) throw new Error('Geen toegang (403). Zorg dat de bin op Private staat en de key klopt.');
+    if (!r.ok) throw new Error('Fout van JSONBin: HTTP ' + r.status);
+    return r.json();
+  })
+  .then(function(data) {
+    var remote = Array.isArray(data) ? data : (data.record || data);
+    if (!Array.isArray(remote)) throw new Error('Onverwacht formaat ontvangen van JSONBin.');
+    // Filter out init placeholder
+    remote = remote.filter(function(d){ return d.id !== "init"; });
+    dictees = remote;
+    sortDictees();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
+    setJbStatus('✅ Verbonden — dictees worden online opgeslagen', 'var(--green-dark)');
+    updateSyncHint(true);
+    renderSavedList();
+    renderStudentList();
+    showAlert('jsonbin-alert', '✅ Verbonden! Dictees worden nu online opgeslagen.', 'green');
+    if (onDone) onDone(true);
+  })
+  .catch(function(err) {
+    var msg = err.message || 'Onbekende fout';
+    setJbStatus('❌ ' + msg, 'var(--red)');
+    showAlert('jsonbin-alert', '❌ ' + msg);
+    if (onDone) onDone(false);
+  });
+}
+
+function setJbStatus(msg, color) {
+  var el = document.getElementById('jb-status');
+  if (el) { el.innerHTML = msg; el.style.color = color || 'var(--gray)'; }
+}
+
+function updateSyncHint(online) {
+  var el = document.getElementById('sync-hint');
+  if (!el) return;
+  if (online) {
+    el.innerHTML = '&#9729;&#65039; Online opgeslagen &#8212; zichtbaar voor alle collega&#39;s';
+  } else {
+    el.innerHTML = '&#128161; Exporteer in Chrome, importeer in Edge &#8212; en andersom';
+  }
+}
+
+function saveJsonBinSettings() {
+  var binId = document.getElementById('jb-bin-id').value.trim();
+  var apiKey = document.getElementById('jb-api-key').value.trim();
+  var alertEl = document.getElementById('jsonbin-alert');
+  var statusEl = document.getElementById('jb-status');
+
+  alertEl.className = 'alert alert-green';
+  alertEl.innerHTML = '⏳ Stap 1: velden controleren...';
+  alertEl.classList.remove('hidden');
+
+  if (!binId) {
+    alertEl.className = 'alert alert-red';
+    alertEl.innerHTML = '❌ BIN ID is leeg. Vul het BIN ID in.';
+    return;
+  }
+  if (!apiKey) {
+    alertEl.className = 'alert alert-red';
+    alertEl.innerHTML = '❌ API Key is leeg. Vul de API Key in.';
+    return;
+  }
+
+  alertEl.innerHTML = '⏳ Stap 2: instellingen opslaan...';
+  var cfg = { binId: binId, apiKey: apiKey };
+  try {
+    localStorage.setItem(JB_KEY, JSON.stringify(cfg));
+    alertEl.innerHTML = '⏳ Stap 3: verbinding testen met JSONBin...';
+  } catch(e) {
+    alertEl.className = 'alert alert-red';
+    alertEl.innerHTML = '❌ Kon instellingen niet opslaan: ' + e.message;
+    return;
+  }
+
+  var url = 'https://api.jsonbin.io/v3/b/' + binId + '/latest';
+  alertEl.innerHTML = '⏳ Stap 4: verzoek sturen naar ' + url;
+
+  fetch(url, {
+    method: 'GET',
+    headers: {
+      'X-Master-Key': apiKey,
+      'X-Bin-Meta': 'false'
+    }
+  })
+  .then(function(r) {
+    alertEl.innerHTML = '⏳ Stap 5: antwoord ontvangen (HTTP ' + r.status + ')';
+    if (r.status === 401) throw new Error('HTTP 401 — API Key klopt niet. Gebruik de X-Master-Key.');
+    if (r.status === 403) throw new Error('HTTP 403 — Geen toegang. Controleer de API Key.');
+    if (r.status === 404) throw new Error('HTTP 404 — BIN ID niet gevonden. Controleer het BIN ID.');
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' — onbekende fout van JSONBin.');
+    return r.json();
+  })
+  .then(function(data) {
+    alertEl.innerHTML = '⏳ Stap 6: gegevens verwerken...';
+    var remote = Array.isArray(data) ? data : (data.record || data);
+    if (!Array.isArray(remote)) throw new Error('JSONBin stuurde geen lijst terug. Inhoud bin moet [] zijn.');
+    remote = remote.filter(function(d){ return d.id !== 'init'; });
+    dictees = remote;
+    sortDictees();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
+    alertEl.className = 'alert alert-green';
+    alertEl.innerHTML = '✅ Verbonden! ' + dictees.length + ' dictee(s) geladen. Alles werkt!';
+    statusEl.innerHTML = '✅ Online verbonden';
+    statusEl.style.color = 'var(--green-dark)';
+    updateSyncHint(true);
+    renderSavedList();
+    renderStudentList();
+  })
+  .catch(function(err) {
+    alertEl.className = 'alert alert-red';
+    alertEl.innerHTML = '❌ Mislukt bij stap: ' + err.message;
+    statusEl.innerHTML = '❌ Niet verbonden';
+    statusEl.style.color = 'var(--red)';
+  });
+}
+
+function clearJsonBinSettings() {
+  if (!confirm('Online verbinding verwijderen? Dictees blijven lokaal bewaard.')) return;
+  localStorage.removeItem(JB_KEY);
+  document.getElementById('jb-bin-id').value = '';
+  document.getElementById('jb-api-key').value = '';
+  setJbStatus('', '');
+  updateSyncHint(false);
+}
+
+function initJsonBin() {
+  var cfg = getJbConfig();
+  if (!cfg) { updateSyncHint(false); return; }
+  // Vul velden in als ze beschikbaar zijn (leerkrachtpaneel)
+  var binEl = document.getElementById('jb-bin-id');
+  var keyEl = document.getElementById('jb-api-key');
+  if (binEl) binEl.value = cfg.binId;
+  if (keyEl) keyEl.value = cfg.apiKey;
+  // Laad altijd dictees van JSONBin, ook voor leerlingen
+  loadFromJsonBinSilent(cfg);
+}
+
+function loadFromJsonBinSilent(cfg) {
+  fetch('https://api.jsonbin.io/v3/b/' + cfg.binId + '/latest', {
+    method: 'GET',
+    headers: { 'X-Master-Key': cfg.apiKey, 'X-Bin-Meta': 'false' }
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  })
+  .then(function(data) {
+    var remote = Array.isArray(data) ? data : (data.record || data);
+    if (!Array.isArray(remote)) throw new Error('Geen lijst');
+    remote = remote.filter(function(d){ return d.id !== 'init'; });
+    dictees = remote;
+    sortDictees();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
+    updateSyncHint(true);
+    setJbStatus('&#9989; Verbonden &#8212; dictees worden online opgeslagen', 'var(--green-dark)');
+    renderSavedList();
+    renderStudentList();
+  })
+  .catch(function(e) {
+    // Stil falen: gebruik lokale data als fallback
+    console.warn('JSONBin laden mislukt, lokale data gebruikt:', e.message);
+    updateSyncHint(false);
+  });
+}
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -491,10 +719,21 @@ function selectDictee(id) {
   selectedId = id;
   document.querySelectorAll('.dictee-option').forEach(function(e){ e.classList.remove('selected'); });
   document.getElementById('opt-' + id).classList.add('selected');
-  document.getElementById('start-row').classList.remove('hidden');
+  var startRow = document.getElementById('start-row');
+  startRow.classList.remove('hidden');
+  setTimeout(function() {
+    startRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
 }
 
 function startDictee() {
+  // Sync player speed with selector speed
+  var selectorSpeed = parseFloat(document.getElementById('student-speed').value || 1.0);
+  var playerSpeedEl = document.getElementById('player-speed');
+  if (playerSpeedEl) {
+    playerSpeedEl.value = selectorSpeed;
+    updatePlayerSpeed();
+  }
   currentDictee = dictees.find(function(d){ return d.id === selectedId; });
   if (!currentDictee) return;
   currentIndex = 0;
@@ -520,6 +759,30 @@ function updatePlayer() {
   document.getElementById('speak-lbl').textContent = 'Klik om het woord te horen';
 }
 
+function updateStudentSpeed() {
+  var v = parseFloat(document.getElementById('student-speed').value);
+  var map = [[0.4,'Heel langzaam'],[0.5,'Langzaam'],[0.6,'Duidelijk'],[0.75,'Normaal'],[0.875,'Vlot'],[1.0,'Snel']];
+  var label = map.reduce(function(a,b){ return Math.abs(b[0]-v) < Math.abs(a[0]-v) ? b : a; })[1];
+  document.getElementById('student-speed-val').textContent = label;
+}
+
+function getStudentSpeed() {
+  // Gebruik de player-snelheid als die zichtbaar is, anders de keuze-snelheid
+  var playerEl = document.getElementById('player-speed');
+  var selectorEl = document.getElementById('student-speed');
+  if (playerEl && document.getElementById('player').style.display !== 'none') {
+    return parseFloat(playerEl.value);
+  }
+  return selectorEl ? parseFloat(selectorEl.value) : 1.0;
+}
+
+function updatePlayerSpeed() {
+  var v = parseFloat(document.getElementById('player-speed').value);
+  var map = [[0.4,'Heel langzaam'],[0.5,'Langzaam'],[0.6,'Duidelijk'],[0.75,'Gewoon'],[0.875,'Vlot'],[1.0,'Snel']];
+  var label = map.reduce(function(a,b){ return Math.abs(b[0]-v) < Math.abs(a[0]-v) ? b : a; })[1];
+  document.getElementById('player-speed-val').textContent = label;
+}
+
 function getBestDutchVoice() {
   var voices = window.speechSynthesis.getVoices();
   // Prefer high-quality online Dutch voices (clearest articulation)
@@ -538,7 +801,7 @@ function speakWord() {
   if (!currentDictee) return;
   window.speechSynthesis.cancel();
   var word = currentDictee.words[currentIndex];
-  var rate = currentDictee.speed || 0.6;
+  var rate = getStudentSpeed();
   var voice = getBestDutchVoice();
   var sb = document.getElementById('speak-btn');
   sb.classList.add('speaking'); sb.textContent = '🔈';
@@ -595,9 +858,10 @@ function backToSelector() {
 }
 
 window.speechSynthesis.onvoiceschanged = function(){ window.speechSynthesis.getVoices(); };
-dictees = loadAll();
+dictees = loadAll(); sortDictees();
 renderSavedList();
 updateSpeedLabel();
+initJsonBin();
 // Start in leerlinggedeelte
 document.getElementById('teacher-panel').style.display = 'none';
 document.getElementById('student-panel').style.display = 'block';
