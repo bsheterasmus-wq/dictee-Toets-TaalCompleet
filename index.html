@@ -1,510 +1,871 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TaalCompleet A1 - Cijferadministratie</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    * { font-family: 'Fredoka', sans-serif; }
-    .mono { font-family: 'Space Mono', monospace; }
-    .grade-input { transition: all 0.3s ease; }
-    .grade-input:focus { transform: scale(1.05); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
-    .student-row { animation: slideIn 0.5s ease; }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-20px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    .card-shadow {
-      box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.1), 
-                  0 2px 4px -1px rgba(99, 102, 241, 0.06),
-                  0 0 0 1px rgba(99, 102, 241, 0.05);
-    }
-    .header-accent {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictees Toets Taal Compleet</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#3b82f6; --blue-dark:#1d4ed8; --blue-light:#eff6ff;
+  --green:#22c55e; --green-dark:#15803d;
+  --yellow:#fbbf24; --yellow-light:#fef3c7;
+  --purple:#8b5cf6;
+  --red:#ef4444; --red-light:#fef2f2;
+  --gray:#6b7280; --gray-light:#f3f4f6;
+  --bg:#f0f9ff;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  font-family:'Nunito',sans-serif; background:var(--bg); min-height:100vh;
+  padding:24px 16px 48px;
+  background-image:radial-gradient(circle at 15% 15%,#bfdbfe55,transparent 50%),
+                   radial-gradient(circle at 85% 85%,#ddd6fe55,transparent 50%);
+}
+.app-header { text-align:center; margin-bottom:24px; }
+.app-header h1 { font-family:'Fredoka One',cursive; font-size:2.6rem; color:var(--blue-dark); }
+.app-header p { color:var(--gray); font-weight:600; font-size:.95rem; }
+.card { background:white; border-radius:24px; padding:28px; max-width:560px; margin:0 auto 20px; box-shadow:0 8px 30px rgba(59,130,246,.1); }
+.card h2 { font-family:'Fredoka One',cursive; font-size:1.35rem; color:var(--blue-dark); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.tabs { display:flex; gap:8px; max-width:560px; margin:0 auto 20px; }
+.tab-btn { flex:1; padding:12px; border:2px solid; border-radius:14px; font-family:'Fredoka One',cursive; font-size:1.05rem; cursor:pointer; transition:all .2s; text-align:center; }
+.tab-teacher { border-color:var(--blue); color:var(--blue); background:white; }
+.tab-teacher.active { background:var(--blue); color:white; box-shadow:0 4px 12px rgba(59,130,246,.35); }
+.tab-student { border-color:var(--green); color:var(--green-dark); background:white; }
+.tab-student.active { background:var(--green); color:white; box-shadow:0 4px 12px rgba(34,197,94,.35); }
+.field-label { display:block; font-weight:700; color:#374151; margin-bottom:6px; font-size:.9rem; }
+.field-row { margin-bottom:16px; }
+input[type=text], textarea { width:100%; border:2px solid #e5e7eb; border-radius:12px; padding:10px 14px; font-family:'Nunito',sans-serif; font-size:1rem; font-weight:600; color:#111827; outline:none; transition:border-color .2s; resize:vertical; }
+input[type=text]:focus, textarea:focus { border-color:var(--blue); background:#f0f7ff; }
+textarea { min-height:130px; }
+.hint { font-size:.82rem; color:var(--gray); margin-top:4px; font-weight:600; }
+.speed-row { display:flex; align-items:center; gap:12px; background:var(--yellow-light); border-radius:14px; padding:12px 16px; margin-bottom:20px; }
+.speed-row label { font-weight:700; color:#92400e; font-size:.9rem; white-space:nowrap; }
+.speed-row input[type=range] { flex:1; accent-color:var(--yellow); }
+.speed-val { font-family:'Fredoka One',cursive; color:#b45309; min-width:65px; text-align:right; font-size:1rem; }
+.btn-row { display:flex; gap:10px; flex-wrap:wrap; }
+.btn { padding:12px 20px; border-radius:14px; border:none; font-family:'Fredoka One',cursive; font-size:1.05rem; cursor:pointer; transition:transform .15s; display:flex; align-items:center; gap:6px; }
+.btn:hover { transform:translateY(-1px); }
+.btn-blue { background:linear-gradient(135deg,var(--blue),var(--blue-dark)); color:white; box-shadow:0 4px 12px rgba(59,130,246,.4); flex:1; justify-content:center; font-size:1.15rem; }
+.btn-green { background:linear-gradient(135deg,var(--green),var(--green-dark)); color:white; box-shadow:0 4px 12px rgba(34,197,94,.4); flex:1; justify-content:center; }
+.btn-outline { background:white; border:2px solid #e5e7eb; color:#374151; }
+.btn-outline:hover { background:var(--gray-light); }
+.saved-list-wrap { display:flex; flex-direction:column; gap:10px; }
+.saved-item { display:flex; align-items:center; gap:10px; background:var(--gray-light); border-radius:14px; padding:12px 14px; border:2px solid transparent; transition:border-color .2s; }
+.saved-item:hover { border-color:var(--blue); background:var(--blue-light); }
+.saved-item-title { font-weight:800; color:#1e3a5f; font-size:.95rem; }
+.saved-item-meta { font-size:.8rem; color:var(--gray); font-weight:600; }
+.saved-item-btns { display:flex; gap:6px; flex-shrink:0; }
+.icon-btn { width:34px; height:34px; border-radius:10px; border:none; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+.ib-blue { background:var(--blue-light); color:var(--blue); } .ib-blue:hover { background:#bfdbfe; }
+.ib-green { background:#dcfce7; color:var(--green-dark); } .ib-green:hover { background:#bbf7d0; }
+.ib-red { background:var(--red-light); color:var(--red); } .ib-red:hover { background:#fecaca; }
+.empty-state { text-align:center; padding:24px; color:var(--gray); font-weight:600; }
+.empty-state .emoji { font-size:2.5rem; display:block; margin-bottom:8px; }
+.alert { padding:10px 14px; border-radius:10px; font-weight:700; font-size:.88rem; margin-bottom:12px; }
+.alert-red { background:var(--red-light); color:var(--red); border:1.5px solid #fca5a5; }
+.alert-green { background:#dcfce7; color:var(--green-dark); border:1.5px solid #86efac; }
+.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100; display:flex; align-items:center; justify-content:center; padding:16px; }
+.modal { background:white; border-radius:24px; padding:28px; width:100%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,.2); animation:modal-in .2s ease; }
+@keyframes modal-in { from{transform:scale(.95);opacity:0} to{transform:scale(1);opacity:1} }
+.modal h2 { font-family:'Fredoka One',cursive; font-size:1.35rem; color:var(--blue-dark); margin-bottom:16px; }
+.modal-btns { display:flex; gap:10px; margin-top:4px; }
+#student-panel { display:none; }
+.dictee-selector { display:flex; flex-direction:column; gap:8px; }
+.dictee-option { padding:14px 16px; background:var(--blue-light); border:2px solid #bfdbfe; border-radius:16px; cursor:pointer; transition:all .2s; }
+.dictee-option:hover, .dictee-option.selected { background:var(--blue); border-color:var(--blue); }
+.dictee-option:hover .dopt-title, .dictee-option.selected .dopt-title { color:white; }
+.dictee-option:hover .dopt-meta, .dictee-option.selected .dopt-meta { color:#bfdbfe; }
+.dopt-title { font-weight:800; font-size:.95rem; color:var(--blue-dark); }
+.dopt-meta { font-size:.8rem; color:var(--gray); font-weight:600; margin-top:2px; }
+#player { display:none; text-align:center; }
+.prog-wrap { background:#e0e9ff; border-radius:20px; height:10px; overflow:hidden; margin-bottom:6px; }
+.prog-fill { height:100%; background:linear-gradient(90deg,var(--blue),var(--purple)); border-radius:20px; transition:width .5s; }
+.prog-label { font-size:.85rem; font-weight:700; color:var(--gray); margin-bottom:20px; }
+.big-num { font-family:'Fredoka One',cursive; font-size:6rem; line-height:1; color:var(--blue); margin-bottom:6px; }
+.big-num.pop { animation:pop .3s ease; }
+@keyframes pop { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+.word-hint { font-size:.95rem; font-weight:700; color:var(--gray); margin-bottom:28px; }
+.speak-btn { width:130px; height:130px; border-radius:50%; border:none; background:linear-gradient(135deg,var(--blue),var(--purple)); color:white; font-size:3.2rem; cursor:pointer; box-shadow:0 8px 25px rgba(59,130,246,.4); transition:transform .15s; display:flex; align-items:center; justify-content:center; margin:0 auto 18px; }
+.speak-btn:hover { transform:scale(1.05); } .speak-btn:active { transform:scale(.96); }
+.speak-btn.speaking { animation:ring 1.2s infinite; }
+@keyframes ring { 0%{box-shadow:0 0 0 0 rgba(59,130,246,.5)} 70%{box-shadow:0 0 0 20px rgba(59,130,246,0)} 100%{box-shadow:0 0 0 0 rgba(59,130,246,0)} }
+.speak-lbl { font-size:.85rem; font-weight:700; color:var(--gray); margin-bottom:22px; }
+.player-nav { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.nbtn { padding:11px 22px; border-radius:12px; font-family:'Nunito',sans-serif; font-weight:800; font-size:.95rem; cursor:pointer; border:2px solid; transition:all .15s; }
+.nprev { border-color:#d1d5db; color:var(--gray); background:white; } .nprev:hover { background:var(--gray-light); }
+.nnext { border-color:var(--green); background:var(--green); color:white; } .nnext:hover { background:var(--green-dark); }
+.ndone { border-color:var(--yellow); background:var(--yellow); color:#78350f; } .ndone:hover { background:#f59e0b; }
+.back-link { display:inline-block; margin-top:14px; font-size:.88rem; font-weight:700; color:var(--blue); cursor:pointer; text-decoration:underline; }
+#done-card { display:none; text-align:center; }
+.done-emoji { font-size:4rem; margin-bottom:10px; }
+.done-stars { font-size:2rem; letter-spacing:6px; margin-bottom:14px; }
+.done-title { font-family:'Fredoka One',cursive; font-size:2rem; color:var(--green-dark); margin-bottom:6px; }
+.done-sub { color:var(--gray); font-weight:600; margin-bottom:24px; }
+.done-btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.hidden { display:none !important; }
+.pw-error { color:var(--red); font-weight:700; font-size:.88rem; margin-top:8px; min-height:20px; }
+input[type=password] { width:100%; border:2px solid #e5e7eb; border-radius:12px; padding:10px 14px; font-family:'Nunito',sans-serif; font-size:1.1rem; font-weight:700; color:#111827; outline:none; transition:border-color .2s; letter-spacing:3px; }
+input[type=password]:focus { border-color:var(--blue); background:#f0f7ff; }
+</style>
 </head>
 <body>
-  <div id="root"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+<div class="app-header">
+  <h1>&#128221; Dictees Toets Taal Compleet</h1>
+  <p>Maak en deel dictees met je klas</p>
+</div>
 
-    // ============================================
-    // FIREBASE CONFIGURATIE - VUL HIER JE GEGEVENS IN
-    // ============================================
-    const firebaseConfig = {
-      apiKey: "{JE_API_KEY}",
-      authDomain: "{JE_PROJECT_ID}.firebaseapp.com",
-      projectId: "{JE_PROJECT_ID}",
-      storageBucket: "{JE_PROJECT_ID}.appspot.com",
-      messagingSenderId: "{JE_SENDER_ID}",
-      appId: "{JE_APP_ID}"
-    };
-    
-    const APP_PASSWORD = 'ISK2026!';
-    // ============================================
+<div class="tabs">
+  <button class="tab-btn tab-teacher" onclick="showTab('teacher')">&#128105;&#8205;&#127979; Leerkracht</button>
+  <button class="tab-btn tab-student active" onclick="showTab('student')">&#127978; Leerling</button>
+</div>
 
-    // Initialize Firebase
-    let db;
+<!-- LEERKRACHT -->
+<div id="teacher-panel">
+  <div class="card">
+    <h2>&#9999;&#65039; Nieuw dictee maken</h2>
+    <div id="create-alert" class="alert hidden"></div>
+    <div class="field-row">
+      <label class="field-label">Titel van het dictee</label>
+      <input type="text" id="dictee-title" placeholder="bijv. Week 12 - ei/ij woorden" maxlength="60">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Woorden (een per regel, max. 30)</label>
+      <textarea id="words-input" placeholder="Plak of typ hier de woorden:&#10;fiets&#10;school&#10;schrijven&#10;..."></textarea>
+      <p class="hint">&#128161; Kopieer de woorden uit je methode en plak ze hier</p>
+    </div>
+    <div class="speed-row">
+      <label>&#128034; Spreeksnelheid</label>
+      <input type="range" id="speed-slider" min="0.4" max="1.0" step="0.05" value="0.6" oninput="updateSpeedLabel()">
+      <span class="speed-val" id="speed-val">Duidelijk</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-blue" onclick="saveDictee()">&#128190; Opslaan</button>
+      <button class="btn btn-outline" onclick="clearForm()">&#128465; Wissen</button>
+    </div>
+  </div>
+
+  <div class="card" id="jsonbin-card" style="display:none">
+    <h2>&#9881;&#65039; Online opslag instellen</h2>
+    <div id="jsonbin-alert" class="alert hidden"></div>
+    <p style="font-size:.88rem;color:var(--gray);font-weight:600;margin-bottom:14px">Vul je JSONBin gegevens in om dictees online op te slaan. Zo zien alle collega's en browsers dezelfde dictees.</p>
+    <div class="field-row">
+      <label class="field-label">BIN ID</label>
+      <input type="text" id="jb-bin-id" placeholder="bijv. 6789abc123def456..." maxlength="40">
+    </div>
+    <div class="field-row">
+      <label class="field-label">API Key</label>
+      <input type="text" id="jb-api-key" placeholder="bijv. $2b$10$..." maxlength="120">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-blue" onclick="saveJsonBinSettings()">&#128279; Verbinding maken</button>
+      <button class="btn btn-outline" onclick="clearJsonBinSettings()">&#10006; Verwijderen</button>
+    </div>
+    <div id="jb-status" style="margin-top:12px;font-size:.85rem;font-weight:700;color:var(--gray);text-align:center"></div>
+  </div>
+
+  <div class="card">
+    <h2>&#128193; Opgeslagen dictees</h2>
+    <div id="saved-list"></div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-outline" onclick="exportDictees()" style="flex:1;font-size:.95rem">&#11014;&#65039; Exporteren</button>
+      <label class="btn btn-outline" style="flex:1;font-size:.95rem;cursor:pointer;justify-content:center">
+        &#11015;&#65039; Importeren
+        <input type="file" id="import-file" accept=".json" onchange="importDictees(event)" style="display:none">
+      </label>
+    </div>
+    <p style="font-size:.78rem;color:var(--gray);font-weight:600;margin-top:8px;text-align:center" id="sync-hint"></p>
+  </div>
+</div>
+
+<!-- LEERLING -->
+<div id="student-panel">
+  <div class="card" id="selector-card">
+    <h2>&#127978; Kies een dictee</h2>
+    <div id="student-list"></div>
+    <div id="start-row" class="hidden" style="margin-top:16px">
+      <button class="btn btn-blue" style="width:100%;font-size:1.3rem;padding:16px" onclick="startDictee()">&#9654;&#65039; Dictee starten</button>
+      <div style="background:#fef3c7;border-radius:14px;padding:12px 16px;margin-top:12px;display:flex;align-items:center;gap:12px">
+        <label style="font-weight:700;color:#92400e;font-size:.9rem;white-space:nowrap">&#128266; Snelheid</label>
+        <input type="range" id="student-speed" min="0.4" max="1.0" step="0.05" value="1.0" oninput="updateStudentSpeed()" style="flex:1;accent-color:#fbbf24">
+        <span style="font-family:Fredoka One,cursive;color:#b45309;min-width:70px;text-align:right;font-size:1rem" id="student-speed-val">Snel</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="player">
+    <div class="prog-wrap"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-label" id="prog-label">Woord 1 van ?</div>
+    <div class="big-num" id="big-num">1</div>
+    <div class="word-hint">Druk op de knop om het woord te horen</div>
+    <button class="speak-btn" id="speak-btn" onclick="speakWord()">&#128266;</button>
+    <div class="speak-lbl" id="speak-lbl">Klik om het woord te horen</div>
+    <div style="background:#fef3c7;border-radius:14px;padding:10px 16px;margin:12px 0;display:flex;align-items:center;gap:12px">
+      <label style="font-weight:700;color:#92400e;font-size:.9rem;white-space:nowrap">&#128266; Snelheid</label>
+      <input type="range" id="player-speed" min="0.4" max="1.0" step="0.05" value="1.0" oninput="updatePlayerSpeed()" style="flex:1;accent-color:#fbbf24">
+      <span style="font-family:Fredoka One,cursive;color:#b45309;min-width:70px;text-align:right;font-size:1rem" id="player-speed-val">Snel</span>
+    </div>
+    <div class="player-nav">
+      <button class="nbtn nprev" id="nav-prev" onclick="prevWord()">&#8592; Vorige</button>
+      <button class="nbtn nnext" id="nav-next" onclick="nextWord()">Volgende &#8594;</button>
+      <button class="nbtn ndone hidden" id="nav-done" onclick="finishDictee()">&#9989; Klaar!</button>
+    </div>
+    <div><span class="back-link" onclick="backToSelector()">&#8617; Terug naar keuze</span></div>
+  </div>
+
+  <div class="card" id="done-card">
+    <div class="done-emoji">&#127881;</div>
+    <div class="done-stars">&#11088;&#11088;&#11088;</div>
+    <div class="done-title">Dictee klaar!</div>
+    <div class="done-sub" id="done-sub">Goed gedaan!</div>
+    <div class="done-btns">
+      <button class="btn btn-blue" onclick="restartDictee()">&#128260; Opnieuw</button>
+      <button class="btn btn-outline" onclick="backToSelector()">&#128193; Ander dictee</button>
+    </div>
+  </div>
+</div>
+
+<!-- WACHTWOORD MODAL -->
+<div class="modal-backdrop hidden" id="pw-modal">
+  <div class="modal" style="max-width:380px;text-align:center">
+    <div style="font-size:3rem;margin-bottom:8px">🔒</div>
+    <h2 style="justify-content:center;margin-bottom:8px">Leerkracht inloggen</h2>
+    <p style="color:var(--gray);font-weight:600;font-size:.9rem;margin-bottom:16px">Voer het wachtwoord in om verder te gaan</p>
+    <input type="password" id="pw-input" placeholder="Wachtwoord" onkeydown="if(event.key==='Enter')checkPassword()">
+    <div class="pw-error hidden" id="pw-error">❌ Onjuist wachtwoord, probeer opnieuw.</div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-blue" onclick="checkPassword()" style="flex:1">🔓 Inloggen</button>
+      <button class="btn btn-outline" onclick="closePwModal()">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIJZIG MODAL -->
+<div class="modal-backdrop hidden" id="edit-modal">
+  <div class="modal">
+    <h2>&#9999;&#65039; Dictee wijzigen</h2>
+    <div id="edit-alert" class="alert hidden"></div>
+    <div class="field-row">
+      <label class="field-label">Titel van het dictee</label>
+      <input type="text" id="edit-title" placeholder="Titel..." maxlength="60">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Woorden (een per regel, max. 30)</label>
+      <textarea id="edit-words" style="min-height:160px" placeholder="fiets&#10;school&#10;schrijven&#10;..."></textarea>
+    </div>
+    <div class="speed-row">
+      <label>&#128034; Spreeksnelheid</label>
+      <input type="range" id="edit-speed" min="0.4" max="1.0" step="0.05" value="0.6" oninput="updateEditSpeedLabel()">
+      <span class="speed-val" id="edit-speed-val">Duidelijk</span>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-green" onclick="saveEdit()">&#128190; Wijzigingen opslaan</button>
+      <button class="btn btn-outline" onclick="closeEdit()">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var STORAGE_KEY = 'dicteeApp_v2';
+var dictees = [];
+var currentDictee = null;
+var currentIndex = 0;
+var selectedId = null;
+var editingId = null;
+
+var JB_KEY = 'jsonbin_v1';
+
+function getJbConfig() {
+  // Vaste verbinding - hoeft niet ingesteld te worden
+  return { binId: '69aebe45d0ea881f40003428', apiKey: '$2a$10$RLtKp3BpaiUi6TqRsnW.3.C3zkJfGzSWGwFXg2GOrjBbwGMJpcjf6' };
+}
+
+function sortDictees() {
+  dictees.sort(function(a, b) { return a.title.localeCompare(b.title, "nl", {sensitivity: "base"}); });
+}
+
+function loadAll() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch(e) { return []; }
+}
+
+function saveAll() {
+  sortDictees();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
+  var cfg = getJbConfig();
+  if (cfg) pushToJsonBin(cfg);
+}
+
+function pushToJsonBin(cfg) {
+  fetch('https://api.jsonbin.io/v3/b/' + cfg.binId, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': cfg.apiKey },
+    body: JSON.stringify(dictees)
+  }).catch(function(e) { console.warn('JSONBin sync failed', e); });
+}
+
+function fetchFromJsonBin(cfg, onDone) {
+  setJbStatus('⏳ Verbinding maken...', 'var(--gray)');
+  showAlert('jsonbin-alert', '⏳ Bezig met verbinden...', 'green');
+  fetch('https://api.jsonbin.io/v3/b/' + cfg.binId + '/latest', {
+    headers: { 'X-Master-Key': cfg.apiKey, 'X-Bin-Meta': 'false' }
+  })
+  .then(function(r) {
+    if (r.status === 401) throw new Error('API Key klopt niet (401). Gebruik de „X-Master-Key” uit het API Keys menu.');
+    if (r.status === 404) throw new Error('BIN ID niet gevonden (404). Controleer het BIN ID.');
+    if (r.status === 403) throw new Error('Geen toegang (403). Zorg dat de bin op Private staat en de key klopt.');
+    if (!r.ok) throw new Error('Fout van JSONBin: HTTP ' + r.status);
+    return r.json();
+  })
+  .then(function(data) {
+    var remote = Array.isArray(data) ? data : (data.record || data);
+    if (!Array.isArray(remote)) throw new Error('Onverwacht formaat ontvangen van JSONBin.');
+    // Filter out init placeholder
+    remote = remote.filter(function(d){ return d.id !== "init"; });
+    dictees = remote;
+    sortDictees();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
+    setJbStatus('✅ Verbonden — dictees worden online opgeslagen', 'var(--green-dark)');
+    updateSyncHint(true);
+    renderSavedList();
+    renderStudentList();
+    showAlert('jsonbin-alert', '✅ Verbonden! Dictees worden nu online opgeslagen.', 'green');
+    if (onDone) onDone(true);
+  })
+  .catch(function(err) {
+    var msg = err.message || 'Onbekende fout';
+    setJbStatus('❌ ' + msg, 'var(--red)');
+    showAlert('jsonbin-alert', '❌ ' + msg);
+    if (onDone) onDone(false);
+  });
+}
+
+function setJbStatus(msg, color) {
+  var el = document.getElementById('jb-status');
+  if (el) { el.innerHTML = msg; el.style.color = color || 'var(--gray)'; }
+}
+
+function updateSyncHint(online) {
+  var el = document.getElementById('sync-hint');
+  if (!el) return;
+  if (online) {
+    el.innerHTML = '&#9729;&#65039; Online opgeslagen &#8212; zichtbaar voor alle collega&#39;s';
+  } else {
+    el.innerHTML = '&#128161; Exporteer in Chrome, importeer in Edge &#8212; en andersom';
+  }
+}
+
+function saveJsonBinSettings() {
+  var binId = document.getElementById('jb-bin-id').value.trim();
+  var apiKey = document.getElementById('jb-api-key').value.trim();
+  var alertEl = document.getElementById('jsonbin-alert');
+  var statusEl = document.getElementById('jb-status');
+
+  alertEl.className = 'alert alert-green';
+  alertEl.innerHTML = '⏳ Stap 1: velden controleren...';
+  alertEl.classList.remove('hidden');
+
+  if (!binId) {
+    alertEl.className = 'alert alert-red';
+    alertEl.innerHTML = '❌ BIN ID is leeg. Vul het BIN ID in.';
+    return;
+  }
+  if (!apiKey) {
+    alertEl.className = 'alert alert-red';
+    alertEl.innerHTML = '❌ API Key is leeg. Vul de API Key in.';
+    return;
+  }
+
+  alertEl.innerHTML = '⏳ Stap 2: instellingen opslaan...';
+  var cfg = { binId: binId, apiKey: apiKey };
+  try {
+    localStorage.setItem(JB_KEY, JSON.stringify(cfg));
+    alertEl.innerHTML = '⏳ Stap 3: verbinding testen met JSONBin...';
+  } catch(e) {
+    alertEl.className = 'alert alert-red';
+    alertEl.innerHTML = '❌ Kon instellingen niet opslaan: ' + e.message;
+    return;
+  }
+
+  var url = 'https://api.jsonbin.io/v3/b/' + binId + '/latest';
+  alertEl.innerHTML = '⏳ Stap 4: verzoek sturen naar ' + url;
+
+  fetch(url, {
+    method: 'GET',
+    headers: {
+      'X-Master-Key': apiKey,
+      'X-Bin-Meta': 'false'
+    }
+  })
+  .then(function(r) {
+    alertEl.innerHTML = '⏳ Stap 5: antwoord ontvangen (HTTP ' + r.status + ')';
+    if (r.status === 401) throw new Error('HTTP 401 — API Key klopt niet. Gebruik de X-Master-Key.');
+    if (r.status === 403) throw new Error('HTTP 403 — Geen toegang. Controleer de API Key.');
+    if (r.status === 404) throw new Error('HTTP 404 — BIN ID niet gevonden. Controleer het BIN ID.');
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' — onbekende fout van JSONBin.');
+    return r.json();
+  })
+  .then(function(data) {
+    alertEl.innerHTML = '⏳ Stap 6: gegevens verwerken...';
+    var remote = Array.isArray(data) ? data : (data.record || data);
+    if (!Array.isArray(remote)) throw new Error('JSONBin stuurde geen lijst terug. Inhoud bin moet [] zijn.');
+    remote = remote.filter(function(d){ return d.id !== 'init'; });
+    dictees = remote;
+    sortDictees();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
+    alertEl.className = 'alert alert-green';
+    alertEl.innerHTML = '✅ Verbonden! ' + dictees.length + ' dictee(s) geladen. Alles werkt!';
+    statusEl.innerHTML = '✅ Online verbonden';
+    statusEl.style.color = 'var(--green-dark)';
+    updateSyncHint(true);
+    renderSavedList();
+    renderStudentList();
+  })
+  .catch(function(err) {
+    alertEl.className = 'alert alert-red';
+    alertEl.innerHTML = '❌ Mislukt bij stap: ' + err.message;
+    statusEl.innerHTML = '❌ Niet verbonden';
+    statusEl.style.color = 'var(--red)';
+  });
+}
+
+function clearJsonBinSettings() {
+  if (!confirm('Online verbinding verwijderen? Dictees blijven lokaal bewaard.')) return;
+  localStorage.removeItem(JB_KEY);
+  document.getElementById('jb-bin-id').value = '';
+  document.getElementById('jb-api-key').value = '';
+  setJbStatus('', '');
+  updateSyncHint(false);
+}
+
+function initJsonBin() {
+  var cfg = getJbConfig();
+  if (!cfg) { updateSyncHint(false); return; }
+  // Vul velden in als ze beschikbaar zijn (leerkrachtpaneel)
+  var binEl = document.getElementById('jb-bin-id');
+  var keyEl = document.getElementById('jb-api-key');
+  if (binEl) binEl.value = cfg.binId;
+  if (keyEl) keyEl.value = cfg.apiKey;
+  // Laad altijd dictees van JSONBin, ook voor leerlingen
+  loadFromJsonBinSilent(cfg);
+}
+
+function loadFromJsonBinSilent(cfg) {
+  fetch('https://api.jsonbin.io/v3/b/' + cfg.binId + '/latest', {
+    method: 'GET',
+    headers: { 'X-Master-Key': cfg.apiKey, 'X-Bin-Meta': 'false' }
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  })
+  .then(function(data) {
+    var remote = Array.isArray(data) ? data : (data.record || data);
+    if (!Array.isArray(remote)) throw new Error('Geen lijst');
+    remote = remote.filter(function(d){ return d.id !== 'init'; });
+    dictees = remote;
+    sortDictees();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
+    updateSyncHint(true);
+    setJbStatus('&#9989; Verbonden &#8212; dictees worden online opgeslagen', 'var(--green-dark)');
+    renderSavedList();
+    renderStudentList();
+  })
+  .catch(function(e) {
+    // Stil falen: gebruik lokale data als fallback
+    console.warn('JSONBin laden mislukt, lokale data gebruikt:', e.message);
+    updateSyncHint(false);
+  });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+var teacherUnlocked = false;
+
+function showTab(tab) {
+  if (tab === 'teacher' && !teacherUnlocked) {
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-error').classList.add('hidden');
+    document.getElementById('pw-modal').classList.remove('hidden');
+    setTimeout(function(){ document.getElementById('pw-input').focus(); }, 100);
+    return;
+  }
+  document.getElementById('teacher-panel').style.display = tab === 'teacher' ? 'block' : 'none';
+  document.getElementById('student-panel').style.display = tab === 'student' ? 'block' : 'none';
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelector('.tab-' + tab).classList.add('active');
+  if (tab === 'student') { teacherUnlocked = false; renderStudentList(); }
+}
+
+function checkPassword() {
+  var pw = document.getElementById('pw-input').value;
+  if (pw === 'ISK2026!') {
+    teacherUnlocked = true;
+    document.getElementById('pw-modal').classList.add('hidden');
+    document.getElementById('teacher-panel').style.display = 'block';
+    document.getElementById('student-panel').style.display = 'none';
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelector('.tab-teacher').classList.add('active');
+  } else {
+    document.getElementById('pw-error').classList.remove('hidden');
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+function closePwModal() {
+  document.getElementById('pw-modal').classList.add('hidden');
+}
+
+document.getElementById('pw-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePwModal();
+});
+
+function speedLabel(v) {
+  var map = [[0.4,'Heel langzaam'],[0.5,'Langzaam'],[0.6,'Duidelijk'],[0.75,'Normaal'],[0.875,'Vlot'],[1.0,'Snel']];
+  return map.reduce(function(a,b){ return Math.abs(b[0]-v) < Math.abs(a[0]-v) ? b : a; })[1];
+}
+function updateSpeedLabel() {
+  document.getElementById('speed-val').textContent = speedLabel(parseFloat(document.getElementById('speed-slider').value));
+}
+function updateEditSpeedLabel() {
+  document.getElementById('edit-speed-val').textContent = speedLabel(parseFloat(document.getElementById('edit-speed').value));
+}
+
+function showAlert(elId, msg, type) {
+  var el = document.getElementById(elId);
+  el.className = 'alert alert-' + (type || 'red');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  if (type === 'green') setTimeout(function(){ el.classList.add('hidden'); }, 3500);
+}
+
+function saveDictee() {
+  var title = document.getElementById('dictee-title').value.trim();
+  var raw = document.getElementById('words-input').value;
+  var speed = parseFloat(document.getElementById('speed-slider').value);
+  var words = raw.split('\n').map(function(w){ return w.trim(); }).filter(function(w){ return w.length > 0; });
+  if (!title) { showAlert('create-alert','Geef het dictee een titel!'); return; }
+  if (!words.length) { showAlert('create-alert','Voer minstens een woord in!'); return; }
+  if (words.length > 30) { showAlert('create-alert','Maximaal 30 woorden toegestaan!'); return; }
+  dictees.push({ id: Date.now().toString(), title: title, words: words, speed: speed, created: new Date().toLocaleDateString('nl-NL') });
+  saveAll();
+  renderSavedList();
+  showAlert('create-alert', '"' + title + '" opgeslagen!', 'green');
+  clearForm();
+}
+
+function clearForm() {
+  document.getElementById('dictee-title').value = '';
+  document.getElementById('words-input').value = '';
+  document.getElementById('speed-slider').value = 0.8;
+  updateSpeedLabel();
+}
+
+function renderSavedList() {
+  var el = document.getElementById('saved-list');
+  if (!dictees.length) {
+    el.innerHTML = '<div class="empty-state"><span class="emoji">&#128461;</span>Nog geen dictees opgeslagen</div>';
+    return;
+  }
+  var html = '<div class="saved-list-wrap">';
+  dictees.forEach(function(d) {
+    html += '<div class="saved-item">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div class="saved-item-title">' + escHtml(d.title) + '</div>' +
+        '<div class="saved-item-meta">' + d.words.length + ' woorden &bull; ' + d.created + '</div>' +
+      '</div>' +
+      '<div class="saved-item-btns">' +
+        '<button class="icon-btn ib-blue" onclick="openEdit(\'' + d.id + '\')" title="Wijzigen">&#9999;&#65039;</button>' +
+        '<button class="icon-btn ib-green" onclick="downloadDictee(\'' + d.id + '\')" title="Downloaden voor Teams">&#11015;&#65039;</button>' +
+        '<button class="icon-btn ib-red" onclick="deleteDictee(\'' + d.id + '\')" title="Verwijderen">&#128465;</button>' +
+      '</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function exportDictees() {
+  if (!dictees.length) { alert('Er zijn geen dictees om te exporteren.'); return; }
+  var data = JSON.stringify(dictees, null, 2);
+  var blob = new Blob([data], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'dictees_export.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importDictees(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
     try {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-    } catch (error) {
-      console.error("Firebase init error:", error);
+      var imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) throw new Error();
+      var newCount = 0;
+      imported.forEach(function(d) {
+        if (d.id && d.title && d.words) {
+          var exists = dictees.find(function(x) { return x.id === d.id; });
+          if (!exists) { dictees.push(d); newCount++; }
+        }
+      });
+      saveAll();
+      renderSavedList();
+      showAlert('create-alert', '✅ ' + newCount + ' dictee(s) geïmporteerd!', 'green');
+    } catch(err) {
+      showAlert('create-alert', '❌ Ongeldig bestand. Gebruik een geëxporteerd .json bestand.');
     }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
 
-    // Icons
-    const Upload = ({ className }) => (
-      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="17 8 12 3 7 8"></polyline>
-        <line x1="12" y1="3" x2="12" y2="15"></line>
-      </svg>
-    );
+function deleteDictee(id) {
+  if (!confirm('Dit dictee verwijderen?')) return;
+  dictees = dictees.filter(function(d){ return d.id !== id; });
+  saveAll();
+  renderSavedList();
+}
 
-    const Download = ({ className }) => (
-      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
-    );
+function openEdit(id) {
+  var d = dictees.find(function(x){ return x.id === id; });
+  if (!d) return;
+  editingId = id;
+  document.getElementById('edit-title').value = d.title;
+  document.getElementById('edit-words').value = d.words.join('\n');
+  document.getElementById('edit-speed').value = d.speed || 0.8;
+  updateEditSpeedLabel();
+  document.getElementById('edit-alert').classList.add('hidden');
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
 
-    const Plus = ({ className }) => (
-      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-      </svg>
-    );
+function closeEdit() {
+  editingId = null;
+  document.getElementById('edit-modal').classList.add('hidden');
+}
 
-    const Trash2 = ({ className }) => (
-      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <polyline points="3 6 5 6 21 6"></polyline>
-        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-        <line x1="10" y1="11" x2="10" y2="17"></line>
-        <line x1="14" y1="11" x2="14" y2="17"></line>
-      </svg>
-    );
+function saveEdit() {
+  var title = document.getElementById('edit-title').value.trim();
+  var raw = document.getElementById('edit-words').value;
+  var speed = parseFloat(document.getElementById('edit-speed').value);
+  var words = raw.split('\n').map(function(w){ return w.trim(); }).filter(function(w){ return w.length > 0; });
+  if (!title) { showAlert('edit-alert','Geef het dictee een titel!'); return; }
+  if (!words.length) { showAlert('edit-alert','Voer minstens een woord in!'); return; }
+  if (words.length > 30) { showAlert('edit-alert','Maximaal 30 woorden toegestaan!'); return; }
+  var i = dictees.findIndex(function(d){ return d.id === editingId; });
+  if (i === -1) return;
+  dictees[i].title = title;
+  dictees[i].words = words;
+  dictees[i].speed = speed;
+  saveAll();
+  renderSavedList();
+  closeEdit();
+}
 
-    const Calculator = ({ className }) => (
-      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="4" y="2" width="16" height="20" rx="2"></rect>
-        <line x1="8" y1="6" x2="16" y2="6"></line>
-        <line x1="16" y1="14" x2="16" y2="18"></line>
-        <path d="M16 10h.01"></path>
-        <path d="M12 10h.01"></path>
-        <path d="M8 10h.01"></path>
-        <path d="M12 14h.01"></path>
-        <path d="M8 14h.01"></path>
-        <path d="M12 18h.01"></path>
-        <path d="M8 18h.01"></path>
-      </svg>
-    );
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeEdit();
+});
 
-    const Edit2 = ({ className }) => (
-      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-      </svg>
-    );
+function downloadDictee(id) {
+  var d = dictees.find(function(x){ return x.id === id; });
+  if (!d) return;
+  var html = buildStudentFile(d);
+  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'dictee_' + d.title.replace(/[^a-zA-Z0-9]/g,'_') + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
-    const Check = ({ className }) => (
-      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
-    );
+function buildStudentFile(d) {
+  var wj = JSON.stringify(d.words);
+  var sp = d.speed || 0.6;
+  var ti = escHtml(d.title);
+  var n = d.words.length;
+  return '<!DOCTYPE html>\n<html lang="nl">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0">\n<title>Dictee - ' + ti + '</title>\n<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">\n<style>\n*{box-sizing:border-box;margin:0;padding:0}\nbody{font-family:Nunito,sans-serif;background:#f0f9ff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px;background-image:radial-gradient(circle at 20% 20%,#bfdbfe55,transparent 50%),radial-gradient(circle at 80% 80%,#ddd6fe55,transparent 50%)}\nh1{font-family:"Fredoka One",cursive;font-size:2.2rem;color:#1d4ed8;margin-bottom:4px;text-align:center}\n.sub{color:#6b7280;font-weight:700;margin-bottom:28px;text-align:center}\n.card{background:white;border-radius:24px;padding:28px;width:100%;max-width:460px;box-shadow:0 8px 30px rgba(59,130,246,.12);text-align:center}\n.pw{background:#e0e9ff;border-radius:20px;height:10px;overflow:hidden;margin-bottom:6px}\n.pf{height:100%;background:linear-gradient(90deg,#3b82f6,#8b5cf6);border-radius:20px;transition:width .5s}\n.pl{font-size:.85rem;font-weight:700;color:#6b7280;margin-bottom:20px}\n.bn{font-family:"Fredoka One",cursive;font-size:6rem;line-height:1;color:#3b82f6;margin-bottom:6px}\n.bn.pop{animation:pop .3s ease}\n@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}\n.wh{font-size:.95rem;font-weight:700;color:#6b7280;margin-bottom:28px}\n.sb{width:130px;height:130px;border-radius:50%;border:none;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:white;font-size:3.2rem;cursor:pointer;box-shadow:0 8px 25px rgba(59,130,246,.4);transition:transform .15s;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}\n.sb:hover{transform:scale(1.05)}.sb:active{transform:scale(.96)}\n.sb.sp{animation:ring 1.2s infinite}\n@keyframes ring{0%{box-shadow:0 0 0 0 rgba(59,130,246,.5)}70%{box-shadow:0 0 0 20px rgba(59,130,246,0)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}}\n.sl{font-size:.85rem;font-weight:700;color:#6b7280;margin-bottom:22px}\n.nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}\n.nb{padding:11px 22px;border-radius:12px;font-family:Nunito,sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;border:2px solid;transition:all .15s}\n.np{border-color:#d1d5db;color:#6b7280;background:white}.np:hover{background:#f3f4f6}\n.nn{border-color:#22c55e;background:#22c55e;color:white}.nn:hover{background:#15803d}\n.nd{border-color:#fbbf24;background:#fbbf24;color:#78350f}.nd:hover{background:#f59e0b}\n.hidden{display:none!important}\n#done{display:none;text-align:center}\n.de{font-size:4rem;margin-bottom:10px}.ds{font-size:2rem;letter-spacing:6px;margin-bottom:14px}\n.dt{font-family:"Fredoka One",cursive;font-size:2rem;color:#15803d;margin-bottom:6px}\n.dm{color:#6b7280;font-weight:600;margin-bottom:24px}\n.ag{padding:13px 30px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;border:none;border-radius:14px;font-family:"Fredoka One",cursive;font-size:1.2rem;cursor:pointer;transition:transform .15s}.ag:hover{transform:translateY(-2px)}\n</style>\n</head>\n<body>\n<h1>&#128221; Dictee</h1>\n<p class="sub">' + ti + '</p>\n<div class="card" id="pc">\n<div class="pw"><div class="pf" id="pf" style="width:0%"></div></div>\n<div class="pl" id="pl">Woord 1 van ' + n + '</div>\n<div class="bn" id="bn">1</div>\n<div class="wh">Druk op de knop om het woord te horen</div>\n<button class="sb" id="sb" onclick="speak()">&#128266;</button>\n<div class="sl" id="sl">Klik om het woord te horen</div>\n<div class="nav">\n<button class="nb np" id="np" onclick="prev()">&#8592; Vorige</button>\n<button class="nb nn" id="nn" onclick="nxt()">Volgende &#8594;</button>\n<button class="nb nd hidden" id="nd" onclick="fin()">&#9989; Klaar!</button>\n</div>\n</div>\n<div class="card" id="done">\n<div class="de">&#127881;</div><div class="ds">&#11088;&#11088;&#11088;</div>\n<div class="dt">Dictee klaar!</div>\n<div class="dm">Alle ' + n + ' woorden zijn voorgelezen!</div>\n<button class="ag" onclick="restart()">&#128260; Opnieuw</button>\n</div>\n<script>\nvar W=' + wj + ',S=' + sp + ',i=0;\nfunction ui(){var n=i+1,t=W.length;document.getElementById("pl").textContent="Woord "+n+" van "+t;document.getElementById("pf").style.width=((i/t)*100)+"%";var b=document.getElementById("bn");b.textContent=n;b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop");document.getElementById("np").style.visibility=i===0?"hidden":"visible";var L=i===t-1;document.getElementById("nn").classList.toggle("hidden",L);document.getElementById("nd").classList.toggle("hidden",!L);var sb=document.getElementById("sb");sb.classList.remove("sp");sb.textContent="\\u{1F50A}";document.getElementById("sl").textContent="Klik om het woord te horen";}\nfunction getBestVoice(){var vs=window.speechSynthesis.getVoices();var pref=["Microsoft Mila","Google Nederlands","nl-NL-Standard","Xander"];for(var p=0;p<pref.length;p++){var m=vs.find(function(v){return v.name.indexOf(pref[p])!==-1;});if(m)return m;}return vs.find(function(v){return v.lang==="nl-NL";})||vs.find(function(v){return v.lang.startsWith("nl");})||null;}function speak(){window.speechSynthesis.cancel();var word=W[i];var voice=getBestVoice();var sb=document.getElementById("sb");sb.classList.add("sp");sb.textContent="\\u{1F508}";document.getElementById("sl").textContent="Bezig met voorlezen...";function mkU(t,cb){var u=new SpeechSynthesisUtterance(t);u.lang="nl-NL";u.rate=S;u.pitch=1.0;u.volume=1.0;if(voice)u.voice=voice;u.onend=cb;return u;}var u1=mkU(word,function(){setTimeout(function(){var u2=mkU(word,function(){sb.classList.remove("sp");sb.textContent="\\u{1F50A}";document.getElementById("sl").textContent="Klik opnieuw om te herhalen";});window.speechSynthesis.speak(u2);},800);});window.speechSynthesis.speak(u1);}\nfunction nxt(){if(i<W.length-1){i++;ui();}}\nfunction prev(){if(i>0){i--;ui();}}\nfunction fin(){window.speechSynthesis.cancel();document.getElementById("pc").style.display="none";document.getElementById("done").style.display="block";}\nfunction restart(){i=0;document.getElementById("done").style.display="none";document.getElementById("pc").style.display="block";ui();}\nwindow.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices();};\n<\/script>\n</body></html>';
+}
 
-    const X = ({ className }) => (
-      <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    );
+function renderStudentList() {
+  var el = document.getElementById('student-list');
+  var sr = document.getElementById('start-row');
+  selectedId = null;
+  if (!dictees.length) {
+    el.innerHTML = '<div class="empty-state"><span class="emoji">&#128564;</span>Er zijn nog geen dictees beschikbaar.<br>Vraag je leerkracht om een dictee te maken!</div>';
+    sr.classList.add('hidden');
+    return;
+  }
+  var html = '<div class="dictee-selector">';
+  dictees.forEach(function(d) {
+    html += '<div class="dictee-option" id="opt-' + d.id + '" onclick="selectDictee(\'' + d.id + '\')">' +
+      '<div class="dopt-title">' + escHtml(d.title) + '</div>' +
+      '<div class="dopt-meta">' + d.words.length + ' woorden</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+  sr.classList.add('hidden');
+}
 
-    function ToetscijfersApp() {
-      const [students, setStudents] = useState([]);
-      const [grades, setGrades] = useState({});
-      const [showImport, setShowImport] = useState(false);
-      const [importText, setImportText] = useState('');
-      const [newStudentName, setNewStudentName] = useState('');
-      const [isAuthenticated, setIsAuthenticated] = useState(false);
-      const [passwordInput, setPasswordInput] = useState('');
-      const [loading, setLoading] = useState(true);
-      const [editingId, setEditingId] = useState(null);
-      const [editingName, setEditingName] = useState('');
+function selectDictee(id) {
+  selectedId = id;
+  document.querySelectorAll('.dictee-option').forEach(function(e){ e.classList.remove('selected'); });
+  document.getElementById('opt-' + id).classList.add('selected');
+  var startRow = document.getElementById('start-row');
+  startRow.classList.remove('hidden');
+  setTimeout(function() {
+    startRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
 
-      const themes = ['Thema 1', 'Thema 2', 'Thema 3', 'Thema 4', 'Thema 5', 'Thema 6', 'Thema 7', 'Thema 8'];
+function startDictee() {
+  // Sync player speed with selector speed
+  var selectorSpeed = parseFloat(document.getElementById('student-speed').value || 1.0);
+  var playerSpeedEl = document.getElementById('player-speed');
+  if (playerSpeedEl) {
+    playerSpeedEl.value = selectorSpeed;
+    updatePlayerSpeed();
+  }
+  currentDictee = dictees.find(function(d){ return d.id === selectedId; });
+  if (!currentDictee) return;
+  currentIndex = 0;
+  document.getElementById('selector-card').style.display = 'none';
+  document.getElementById('done-card').style.display = 'none';
+  document.getElementById('player').style.display = 'block';
+  updatePlayer();
+}
 
-      useEffect(() => {
-        const authStatus = sessionStorage.getItem('taalcompleet-auth');
-        if (authStatus === 'true') {
-          setIsAuthenticated(true);
-        }
-        setLoading(false);
-      }, []);
+function updatePlayer() {
+  var total = currentDictee.words.length;
+  var n = currentIndex + 1;
+  document.getElementById('prog-label').textContent = 'Woord ' + n + ' van ' + total;
+  document.getElementById('prog-fill').style.width = ((currentIndex / total) * 100) + '%';
+  var bn = document.getElementById('big-num');
+  bn.textContent = n; bn.classList.remove('pop'); void bn.offsetWidth; bn.classList.add('pop');
+  document.getElementById('nav-prev').style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
+  var last = currentIndex === total - 1;
+  document.getElementById('nav-next').classList.toggle('hidden', last);
+  document.getElementById('nav-done').classList.toggle('hidden', !last);
+  var sb = document.getElementById('speak-btn');
+  sb.classList.remove('speaking'); sb.textContent = '🔊';
+  document.getElementById('speak-lbl').textContent = 'Klik om het woord te horen';
+}
 
-      const handleLogin = (e) => {
-        e.preventDefault();
-        if (passwordInput === APP_PASSWORD) {
-          setIsAuthenticated(true);
-          sessionStorage.setItem('taalcompleet-auth', 'true');
-          setPasswordInput('');
-        } else {
-          alert('Onjuist wachtwoord!');
-          setPasswordInput('');
-        }
-      };
+function updateStudentSpeed() {
+  var v = parseFloat(document.getElementById('student-speed').value);
+  var map = [[0.4,'Heel langzaam'],[0.5,'Langzaam'],[0.6,'Duidelijk'],[0.75,'Normaal'],[0.875,'Vlot'],[1.0,'Snel']];
+  var label = map.reduce(function(a,b){ return Math.abs(b[0]-v) < Math.abs(a[0]-v) ? b : a; })[1];
+  document.getElementById('student-speed-val').textContent = label;
+}
 
-      const handleLogout = () => {
-        setIsAuthenticated(false);
-        sessionStorage.removeItem('taalcompleet-auth');
-      };
+function getStudentSpeed() {
+  // Gebruik de player-snelheid als die zichtbaar is, anders de keuze-snelheid
+  var playerEl = document.getElementById('player-speed');
+  var selectorEl = document.getElementById('student-speed');
+  if (playerEl && document.getElementById('player').style.display !== 'none') {
+    return parseFloat(playerEl.value);
+  }
+  return selectorEl ? parseFloat(selectorEl.value) : 1.0;
+}
 
-      useEffect(() => {
-        if (!isAuthenticated || !db) return;
-        
-        const unsubscribe = db.collection('taalcompleet').doc('cijfers').onSnapshot((doc) => {
-          if (doc.exists) {
-            const data = doc.data();
-            if (data.students) {
-              const sorted = [...data.students].sort((a, b) => a.name.localeCompare(b.name, 'nl'));
-              setStudents(sorted);
-            }
-            if (data.grades) setGrades(data.grades);
-          }
-        });
-        
-        return () => unsubscribe();
-      }, [isAuthenticated]);
+function updatePlayerSpeed() {
+  var v = parseFloat(document.getElementById('player-speed').value);
+  var map = [[0.4,'Heel langzaam'],[0.5,'Langzaam'],[0.6,'Duidelijk'],[0.75,'Gewoon'],[0.875,'Vlot'],[1.0,'Snel']];
+  var label = map.reduce(function(a,b){ return Math.abs(b[0]-v) < Math.abs(a[0]-v) ? b : a; })[1];
+  document.getElementById('player-speed-val').textContent = label;
+}
 
-      const saveToFirebase = async (newStudents, newGrades) => {
-        if (!db) return;
-        try {
-          await db.collection('taalcompleet').doc('cijfers').set({
-            students: newStudents,
-            grades: newGrades,
-            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        } catch (error) {
-          console.error('Error saving:', error);
-          alert('Fout bij opslaan: ' + error.message);
-        }
-      };
+function getBestDutchVoice() {
+  var voices = window.speechSynthesis.getVoices();
+  // Prefer high-quality online Dutch voices (clearest articulation)
+  var preferred = ['Microsoft Mila', 'Google Nederlands', 'nl-NL-Standard', 'Xander', 'Fiona'];
+  for (var p = 0; p < preferred.length; p++) {
+    var match = voices.find(function(v) { return v.name.indexOf(preferred[p]) !== -1; });
+    if (match) return match;
+  }
+  // Fall back to any Dutch voice
+  return voices.find(function(v) { return v.lang === 'nl-NL'; }) ||
+         voices.find(function(v) { return v.lang.startsWith('nl'); }) ||
+         null;
+}
 
-      const addStudent = () => {
-        if (newStudentName.trim() && students.length < 18) {
-          const newStudents = [...students, { id: Date.now(), name: newStudentName.trim() }];
-          newStudents.sort((a, b) => a.name.localeCompare(b.name, 'nl'));
-          setStudents(newStudents);
-          saveToFirebase(newStudents, grades);
-          setNewStudentName('');
-        }
-      };
+function speakWord() {
+  if (!currentDictee) return;
+  window.speechSynthesis.cancel();
+  var word = currentDictee.words[currentIndex];
+  var rate = getStudentSpeed();
+  var voice = getBestDutchVoice();
+  var sb = document.getElementById('speak-btn');
+  sb.classList.add('speaking'); sb.textContent = '🔈';
+  document.getElementById('speak-lbl').textContent = 'Bezig met voorlezen...';
 
-      const removeStudent = (studentId) => {
-        const newStudents = students.filter(s => s.id !== studentId);
-        const newGrades = { ...grades };
-        delete newGrades[studentId];
-        setStudents(newStudents);
-        setGrades(newGrades);
-        saveToFirebase(newStudents, newGrades);
-      };
+  function makeUtterance(text, onDone) {
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'nl-NL';
+    u.rate = rate;
+    u.pitch = 1.0;
+    u.volume = 1.0;
+    if (voice) u.voice = voice;
+    u.onend = onDone;
+    return u;
+  }
 
-      const startEditing = (student) => {
-        setEditingId(student.id);
-        setEditingName(student.name);
-      };
+  // Speak word once, pause, then speak again for clarity
+  var u1 = makeUtterance(word, function() {
+    setTimeout(function() {
+      var u2 = makeUtterance(word, function() {
+        sb.classList.remove('speaking'); sb.textContent = '🔊';
+        document.getElementById('speak-lbl').textContent = 'Klik opnieuw om te herhalen';
+      });
+      window.speechSynthesis.speak(u2);
+    }, 800);
+  });
+  window.speechSynthesis.speak(u1);
+}
 
-      const cancelEditing = () => {
-        setEditingId(null);
-        setEditingName('');
-      };
+function nextWord() { if (currentIndex < currentDictee.words.length - 1) { currentIndex++; updatePlayer(); } }
+function prevWord() { if (currentIndex > 0) { currentIndex--; updatePlayer(); } }
 
-      const saveEditedName = () => {
-        if (!editingName.trim()) {
-          cancelEditing();
-          return;
-        }
-        
-        const newStudents = students.map(s => 
-          s.id === editingId ? { ...s, name: editingName.trim() } : s
-        );
-        newStudents.sort((a, b) => a.name.localeCompare(b.name, 'nl'));
-        setStudents(newStudents);
-        saveToFirebase(newStudents, grades);
-        setEditingId(null);
-        setEditingName('');
-      };
+function finishDictee() {
+  window.speechSynthesis.cancel();
+  document.getElementById('player').style.display = 'none';
+  document.getElementById('done-card').style.display = 'block';
+  document.getElementById('done-sub').textContent = 'Alle ' + currentDictee.words.length + ' woorden van "' + currentDictee.title + '" zijn voorgelezen!';
+}
 
-      const importStudents = () => {
-        const names = importText.split('\n').map(n => n.trim()).filter(n => n.length > 0).slice(0, 18);
-        const newStudents = names.map((name, i) => ({ id: Date.now() + i, name }));
-        newStudents.sort((a, b) => a.name.localeCompare(b.name, 'nl'));
-        setStudents(newStudents);
-        saveToFirebase(newStudents, grades);
-        setImportText('');
-        setShowImport(false);
-      };
+function restartDictee() {
+  currentIndex = 0;
+  document.getElementById('done-card').style.display = 'none';
+  document.getElementById('player').style.display = 'block';
+  updatePlayer();
+}
 
-      const updateGrade = (studentId, themeIndex, value) => {
-        const newGrades = { ...grades };
-        if (!newGrades[studentId]) newGrades[studentId] = {};
-        
-        const gradeValue = value === '' ? null : parseFloat(value);
-        
-        if (gradeValue === null) {
-          delete newGrades[studentId][themeIndex];
-        } else if (gradeValue >= 1 && gradeValue <= 10) {
-          const today = new Date().toLocaleDateString('nl-NL');
-          newGrades[studentId][themeIndex] = {
-            grade: gradeValue,
-            date: newGrades[studentId][themeIndex]?.date || today
-          };
-        }
-        
-        setGrades(newGrades);
-        saveToFirebase(students, newGrades);
-      };
+function backToSelector() {
+  window.speechSynthesis.cancel();
+  currentDictee = null;
+  document.getElementById('player').style.display = 'none';
+  document.getElementById('done-card').style.display = 'none';
+  document.getElementById('selector-card').style.display = 'block';
+  renderStudentList();
+}
 
-      const getGradePeriod = (dateString) => {
-        const parts = dateString.split('-');
-        if (parts.length !== 3) return 1;
-        const month = parseInt(parts[1]);
-        return (month >= 9 || month <= 1) ? 1 : 2;
-      };
-
-      const calculateAverage = (studentId, period) => {
-        if (!grades[studentId]) return '-';
-        const studentGrades = Object.values(grades[studentId]).filter(g => g && g.grade && g.date);
-        if (studentGrades.length === 0) return '-';
-        
-        const filteredGrades = studentGrades.filter(g => getGradePeriod(g.date) === period);
-        if (filteredGrades.length === 0) return '-';
-        
-        const sum = filteredGrades.reduce((acc, g) => acc + g.grade, 0);
-        return (sum / filteredGrades.length).toFixed(1);
-      };
-
-      const exportData = () => {
-        const data = { students, grades, exportDate: new Date().toLocaleDateString('nl-NL') };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `toetscijfers-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-      };
-
-      const importJSON = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const data = JSON.parse(e.target.result);
-            
-            if (data.students && data.grades) {
-              const sortedStudents = [...data.students].sort((a, b) => a.name.localeCompare(b.name, 'nl'));
-              setStudents(sortedStudents);
-              setGrades(data.grades);
-              saveToFirebase(sortedStudents, data.grades);
-              alert('Data succesvol geïmporteerd!');
-            } else {
-              alert('Ongeldig bestand formaat!');
-            }
-          } catch (error) {
-            alert('Fout bij importeren: ' + error.message);
-          }
-        };
-        reader.readAsText(file);
-      };
-
-      if (loading) return <div className="min-h-screen flex items-center justify-center">Laden...</div>;
-
-      if (!isAuthenticated) {
-        return (
-          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl card-shadow p-8 w-full max-w-md">
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg mx-auto mb-4">TC</div>
-                <h1 className="text-3xl font-bold header-accent">TaalCompleet A1</h1>
-                <p className="text-gray-600 mt-2">Cijferadministratie</p>
-              </div>
-              
-              <form onSubmit={handleLogin} className="space-y-6">
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Wachtwoord</label>
-                  <input
-                    type="password"
-                    value={passwordInput}
-                    onChange={(e) => setPasswordInput(e.target.value)}
-                    className="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500"
-                    placeholder="Voer wachtwoord in"
-                    autoFocus
-                  />
-                </div>
-                
-                <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 font-medium text-lg">
-                  Inloggen
-                </button>
-              </form>
-            </div>
-          </div>
-        );
-      }
-
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="bg-white rounded-3xl card-shadow p-6 md:p-8 mb-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">TC</div>
-                  <div>
-                    <h1 className="text-4xl md:text-5xl font-bold header-accent mb-2">TaalCompleet A1</h1>
-                    <p className="text-gray-600 text-lg">Bijhouden van cijfers voor {students.length} leerlingen</p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2 flex-wrap">
-                  <label className="flex items-center gap-2 bg-green-600 text-white px-4 py-3 rounded-xl hover:bg-green-700 font-medium cursor-pointer">
-                    <Upload className="w-4 h-4" />
-                    Import JSON
-                    <input type="file" accept=".json" onChange={importJSON} className="hidden" />
-                  </label>
-                  <button onClick={() => setShowImport(!showImport)} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-3 rounded-xl hover:bg-indigo-700 font-medium">
-                    <Upload className="w-4 h-4" />
-                    Importeer Namen
-                  </button>
-                  <button onClick={exportData} className="flex items-center gap-2 bg-purple-600 text-white px-4 py-3 rounded-xl hover:bg-purple-700 font-medium">
-                    <Download className="w-4 h-4" />
-                    Exporteer
-                  </button>
-                  <button onClick={handleLogout} className="text-gray-600 hover:text-gray-800 px-4 py-3">
-                    Uitloggen
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {showImport && (
-              <div className="bg-white rounded-3xl card-shadow p-6 mb-6">
-                <h3 className="text-xl font-bold mb-4">Leerlingen importeren</h3>
-                <textarea value={importText} onChange={(e) => setImportText(e.target.value)} className="w-full border-2 border-indigo-200 rounded-xl p-4 mb-4" rows="8" placeholder="Naam per regel..." />
-                <div className="flex gap-2">
-                  <button onClick={importStudents} className="bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700">Importeer</button>
-                  <button onClick={() => setShowImport(false)} className="bg-gray-200 px-6 py-3 rounded-xl">Annuleer</button>
-                </div>
-              </div>
-            )}
-
-            <div className="bg-white rounded-3xl card-shadow p-6 mb-6">
-              <h3 className="text-xl font-bold mb-4">Leerling toevoegen</h3>
-              <div className="flex gap-2">
-                <input type="text" value={newStudentName} onChange={(e) => setNewStudentName(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && addStudent()} placeholder="Naam leerling" className="flex-1 border-2 border-indigo-200 rounded-xl px-4 py-3" disabled={students.length >= 18} />
-                <button onClick={addStudent} disabled={students.length >= 18} className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 disabled:bg-gray-300">
-                  <Plus className="w-4 h-4" />
-                  Toevoegen
-                </button>
-              </div>
-            </div>
-
-            {students.length > 0 && (
-              <div className="bg-white rounded-3xl card-shadow p-6 overflow-x-auto">
-                <div className="flex items-center gap-2 mb-6">
-                  <Calculator className="w-6 h-6 text-indigo-600" />
-                  <h3 className="text-2xl font-bold">Cijferoverzicht</h3>
-                </div>
-                
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b-2 border-indigo-200">
-                      <th className="text-left p-2 font-bold sticky left-0 bg-white z-20">Naam</th>
-                      {themes.map((theme, i) => <th key={i} className="p-2 text-center font-bold text-sm">{theme}</th>)}
-                      <th className="p-2 text-center font-bold text-indigo-700 bg-indigo-50"><div className="text-sm">Per. 1/2</div><div className="text-xs font-normal text-gray-500">sep-jan</div></th>
-                      <th className="p-2 text-center font-bold text-purple-700 bg-purple-50"><div className="text-sm">Per. 3/4</div><div className="text-xs font-normal text-gray-500">feb-aug</div></th>
-                      <th className="p-2"><Trash2 className="w-3 h-3 mx-auto text-gray-400" /></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {students.map((student) => (
-                      <tr key={student.id} className="border-b hover:bg-indigo-50">
-                        <td className="p-2 font-medium text-sm sticky left-0 bg-white z-10">
-                          {editingId === student.id ? (
-                            <div className="flex gap-2 items-center">
-                              <input
-                                type="text"
-                                value={editingName}
-                                onChange={(e) => setEditingName(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && saveEditedName()}
-                                className="border-2 border-indigo-500 rounded px-2 py-1 flex-1"
-                                autoFocus
-                              />
-                              <button onClick={saveEditedName} className="text-green-600 hover:bg-green-50 p-1 rounded">
-                                <Check className="w-4 h-4" />
-                              </button>
-                              <button onClick={cancelEditing} className="text-gray-600 hover:bg-gray-50 p-1 rounded">
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex gap-2 items-center group">
-                              <span>{student.name}</span>
-                              <button onClick={() => startEditing(student)} className="opacity-0 group-hover:opacity-100 text-blue-600 hover:bg-blue-50 p-1 rounded transition-opacity">
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                        {themes.map((theme, i) => {
-                          const gradeData = grades[student.id]?.[i];
-                          return (
-                            <td key={i} className="p-1">
-                              <div className="flex flex-col items-center gap-1">
-                                <input type="number" min="1" max="10" step="0.1" value={gradeData?.grade || ''} onChange={(e) => updateGrade(student.id, i, e.target.value)} className="w-16 text-center border-2 border-gray-200 rounded-lg px-1 py-1.5 font-bold mono text-sm grade-input" placeholder="-" />
-                                {gradeData?.date && <span className="text-xs text-gray-500 mono">{gradeData.date}</span>}
-                              </div>
-                            </td>
-                          );
-                        })}
-                        <td className="p-2 text-center bg-indigo-50"><div className="text-xl font-bold text-indigo-700 mono">{calculateAverage(student.id, 1)}</div></td>
-                        <td className="p-2 text-center bg-purple-50"><div className="text-xl font-bold text-purple-700 mono">{calculateAverage(student.id, 2)}</div></td>
-                        <td className="p-2 text-center"><button onClick={() => removeStudent(student.id)} className="text-red-600 hover:bg-red-50 p-1.5 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {students.length === 0 && (
-              <div className="bg-white rounded-3xl card-shadow p-12 text-center">
-                <div className="text-6xl mb-4">📚</div>
-                <h3 className="text-2xl font-bold mb-2">Nog geen leerlingen</h3>
-                <p className="text-gray-600">Voeg leerlingen toe of importeer een lijst</p>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    ReactDOM.render(<ToetscijfersApp />, document.getElementById('root'));
-  </script>
+window.speechSynthesis.onvoiceschanged = function(){ window.speechSynthesis.getVoices(); };
+dictees = loadAll(); sortDictees();
+renderSavedList();
+updateSpeedLabel();
+initJsonBin();
+// Start in leerlinggedeelte
+document.getElementById('teacher-panel').style.display = 'none';
+document.getElementById('student-panel').style.display = 'block';
+renderStudentList();
+</script>
 </body>
 </html>
