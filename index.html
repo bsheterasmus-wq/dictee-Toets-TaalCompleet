@@ -1,871 +1,1951 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dictees Toets Taal Compleet</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --blue:#3b82f6; --blue-dark:#1d4ed8; --blue-light:#eff6ff;
-  --green:#22c55e; --green-dark:#15803d;
-  --yellow:#fbbf24; --yellow-light:#fef3c7;
-  --purple:#8b5cf6;
-  --red:#ef4444; --red-light:#fef2f2;
-  --gray:#6b7280; --gray-light:#f3f4f6;
-  --bg:#f0f9ff;
-}
-* { box-sizing:border-box; margin:0; padding:0; }
-body {
-  font-family:'Nunito',sans-serif; background:var(--bg); min-height:100vh;
-  padding:24px 16px 48px;
-  background-image:radial-gradient(circle at 15% 15%,#bfdbfe55,transparent 50%),
-                   radial-gradient(circle at 85% 85%,#ddd6fe55,transparent 50%);
-}
-.app-header { text-align:center; margin-bottom:24px; }
-.app-header h1 { font-family:'Fredoka One',cursive; font-size:2.6rem; color:var(--blue-dark); }
-.app-header p { color:var(--gray); font-weight:600; font-size:.95rem; }
-.card { background:white; border-radius:24px; padding:28px; max-width:560px; margin:0 auto 20px; box-shadow:0 8px 30px rgba(59,130,246,.1); }
-.card h2 { font-family:'Fredoka One',cursive; font-size:1.35rem; color:var(--blue-dark); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-.tabs { display:flex; gap:8px; max-width:560px; margin:0 auto 20px; }
-.tab-btn { flex:1; padding:12px; border:2px solid; border-radius:14px; font-family:'Fredoka One',cursive; font-size:1.05rem; cursor:pointer; transition:all .2s; text-align:center; }
-.tab-teacher { border-color:var(--blue); color:var(--blue); background:white; }
-.tab-teacher.active { background:var(--blue); color:white; box-shadow:0 4px 12px rgba(59,130,246,.35); }
-.tab-student { border-color:var(--green); color:var(--green-dark); background:white; }
-.tab-student.active { background:var(--green); color:white; box-shadow:0 4px 12px rgba(34,197,94,.35); }
-.field-label { display:block; font-weight:700; color:#374151; margin-bottom:6px; font-size:.9rem; }
-.field-row { margin-bottom:16px; }
-input[type=text], textarea { width:100%; border:2px solid #e5e7eb; border-radius:12px; padding:10px 14px; font-family:'Nunito',sans-serif; font-size:1rem; font-weight:600; color:#111827; outline:none; transition:border-color .2s; resize:vertical; }
-input[type=text]:focus, textarea:focus { border-color:var(--blue); background:#f0f7ff; }
-textarea { min-height:130px; }
-.hint { font-size:.82rem; color:var(--gray); margin-top:4px; font-weight:600; }
-.speed-row { display:flex; align-items:center; gap:12px; background:var(--yellow-light); border-radius:14px; padding:12px 16px; margin-bottom:20px; }
-.speed-row label { font-weight:700; color:#92400e; font-size:.9rem; white-space:nowrap; }
-.speed-row input[type=range] { flex:1; accent-color:var(--yellow); }
-.speed-val { font-family:'Fredoka One',cursive; color:#b45309; min-width:65px; text-align:right; font-size:1rem; }
-.btn-row { display:flex; gap:10px; flex-wrap:wrap; }
-.btn { padding:12px 20px; border-radius:14px; border:none; font-family:'Fredoka One',cursive; font-size:1.05rem; cursor:pointer; transition:transform .15s; display:flex; align-items:center; gap:6px; }
-.btn:hover { transform:translateY(-1px); }
-.btn-blue { background:linear-gradient(135deg,var(--blue),var(--blue-dark)); color:white; box-shadow:0 4px 12px rgba(59,130,246,.4); flex:1; justify-content:center; font-size:1.15rem; }
-.btn-green { background:linear-gradient(135deg,var(--green),var(--green-dark)); color:white; box-shadow:0 4px 12px rgba(34,197,94,.4); flex:1; justify-content:center; }
-.btn-outline { background:white; border:2px solid #e5e7eb; color:#374151; }
-.btn-outline:hover { background:var(--gray-light); }
-.saved-list-wrap { display:flex; flex-direction:column; gap:10px; }
-.saved-item { display:flex; align-items:center; gap:10px; background:var(--gray-light); border-radius:14px; padding:12px 14px; border:2px solid transparent; transition:border-color .2s; }
-.saved-item:hover { border-color:var(--blue); background:var(--blue-light); }
-.saved-item-title { font-weight:800; color:#1e3a5f; font-size:.95rem; }
-.saved-item-meta { font-size:.8rem; color:var(--gray); font-weight:600; }
-.saved-item-btns { display:flex; gap:6px; flex-shrink:0; }
-.icon-btn { width:34px; height:34px; border-radius:10px; border:none; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:background .15s; }
-.ib-blue { background:var(--blue-light); color:var(--blue); } .ib-blue:hover { background:#bfdbfe; }
-.ib-green { background:#dcfce7; color:var(--green-dark); } .ib-green:hover { background:#bbf7d0; }
-.ib-red { background:var(--red-light); color:var(--red); } .ib-red:hover { background:#fecaca; }
-.empty-state { text-align:center; padding:24px; color:var(--gray); font-weight:600; }
-.empty-state .emoji { font-size:2.5rem; display:block; margin-bottom:8px; }
-.alert { padding:10px 14px; border-radius:10px; font-weight:700; font-size:.88rem; margin-bottom:12px; }
-.alert-red { background:var(--red-light); color:var(--red); border:1.5px solid #fca5a5; }
-.alert-green { background:#dcfce7; color:var(--green-dark); border:1.5px solid #86efac; }
-.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100; display:flex; align-items:center; justify-content:center; padding:16px; }
-.modal { background:white; border-radius:24px; padding:28px; width:100%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,.2); animation:modal-in .2s ease; }
-@keyframes modal-in { from{transform:scale(.95);opacity:0} to{transform:scale(1);opacity:1} }
-.modal h2 { font-family:'Fredoka One',cursive; font-size:1.35rem; color:var(--blue-dark); margin-bottom:16px; }
-.modal-btns { display:flex; gap:10px; margin-top:4px; }
-#student-panel { display:none; }
-.dictee-selector { display:flex; flex-direction:column; gap:8px; }
-.dictee-option { padding:14px 16px; background:var(--blue-light); border:2px solid #bfdbfe; border-radius:16px; cursor:pointer; transition:all .2s; }
-.dictee-option:hover, .dictee-option.selected { background:var(--blue); border-color:var(--blue); }
-.dictee-option:hover .dopt-title, .dictee-option.selected .dopt-title { color:white; }
-.dictee-option:hover .dopt-meta, .dictee-option.selected .dopt-meta { color:#bfdbfe; }
-.dopt-title { font-weight:800; font-size:.95rem; color:var(--blue-dark); }
-.dopt-meta { font-size:.8rem; color:var(--gray); font-weight:600; margin-top:2px; }
-#player { display:none; text-align:center; }
-.prog-wrap { background:#e0e9ff; border-radius:20px; height:10px; overflow:hidden; margin-bottom:6px; }
-.prog-fill { height:100%; background:linear-gradient(90deg,var(--blue),var(--purple)); border-radius:20px; transition:width .5s; }
-.prog-label { font-size:.85rem; font-weight:700; color:var(--gray); margin-bottom:20px; }
-.big-num { font-family:'Fredoka One',cursive; font-size:6rem; line-height:1; color:var(--blue); margin-bottom:6px; }
-.big-num.pop { animation:pop .3s ease; }
-@keyframes pop { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
-.word-hint { font-size:.95rem; font-weight:700; color:var(--gray); margin-bottom:28px; }
-.speak-btn { width:130px; height:130px; border-radius:50%; border:none; background:linear-gradient(135deg,var(--blue),var(--purple)); color:white; font-size:3.2rem; cursor:pointer; box-shadow:0 8px 25px rgba(59,130,246,.4); transition:transform .15s; display:flex; align-items:center; justify-content:center; margin:0 auto 18px; }
-.speak-btn:hover { transform:scale(1.05); } .speak-btn:active { transform:scale(.96); }
-.speak-btn.speaking { animation:ring 1.2s infinite; }
-@keyframes ring { 0%{box-shadow:0 0 0 0 rgba(59,130,246,.5)} 70%{box-shadow:0 0 0 20px rgba(59,130,246,0)} 100%{box-shadow:0 0 0 0 rgba(59,130,246,0)} }
-.speak-lbl { font-size:.85rem; font-weight:700; color:var(--gray); margin-bottom:22px; }
-.player-nav { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-.nbtn { padding:11px 22px; border-radius:12px; font-family:'Nunito',sans-serif; font-weight:800; font-size:.95rem; cursor:pointer; border:2px solid; transition:all .15s; }
-.nprev { border-color:#d1d5db; color:var(--gray); background:white; } .nprev:hover { background:var(--gray-light); }
-.nnext { border-color:var(--green); background:var(--green); color:white; } .nnext:hover { background:var(--green-dark); }
-.ndone { border-color:var(--yellow); background:var(--yellow); color:#78350f; } .ndone:hover { background:#f59e0b; }
-.back-link { display:inline-block; margin-top:14px; font-size:.88rem; font-weight:700; color:var(--blue); cursor:pointer; text-decoration:underline; }
-#done-card { display:none; text-align:center; }
-.done-emoji { font-size:4rem; margin-bottom:10px; }
-.done-stars { font-size:2rem; letter-spacing:6px; margin-bottom:14px; }
-.done-title { font-family:'Fredoka One',cursive; font-size:2rem; color:var(--green-dark); margin-bottom:6px; }
-.done-sub { color:var(--gray); font-weight:600; margin-bottom:24px; }
-.done-btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-.hidden { display:none !important; }
-.pw-error { color:var(--red); font-weight:700; font-size:.88rem; margin-top:8px; min-height:20px; }
-input[type=password] { width:100%; border:2px solid #e5e7eb; border-radius:12px; padding:10px 14px; font-family:'Nunito',sans-serif; font-size:1.1rem; font-weight:700; color:#111827; outline:none; transition:border-color .2s; letter-spacing:3px; }
-input[type=password]:focus { border-color:var(--blue); background:#f0f7ff; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aftekenlijst Taalcompleet A1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .student-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .student-selector label {
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+        }
+        
+        .student-selector select {
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .student-selector select:hover {
+            border-color: #667eea;
+        }
+        
+        .student-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .add-student-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .add-student-form input {
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .add-student-form input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            align-items: start;
+        }
+        
+        .active-themes {
+            min-width: 0;
+        }
+        
+        .completed-themes-sidebar {
+            position: sticky;
+            top: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        
+        .completed-themes-sidebar h2 {
+            color: #28a745;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .completed-theme-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 5px solid #28a745;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .completed-theme-item:hover {
+            background: #e8f5e9;
+            transform: translateX(-3px);
+        }
+        
+        .completed-theme-name {
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        
+        .completed-theme-stats {
+            font-size: 0.85em;
+            color: #28a745;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .completed-theme-date {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .no-completed-themes {
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            padding: 20px 10px;
+        }
+        
+        .theme-container {
+            margin-bottom: 30px;
+        }
+        
+        .completed-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            margin-top: 20px;
+        }
+        
+        .completed-section h3 {
+            color: #28a745;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .completed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+        
+        .completed-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            font-size: 0.9em;
+        }
+        
+        .completed-item.latest {
+            background: #d4edda;
+            border-left-width: 6px;
+        }
+        
+        .completed-lesson {
+            background: #f0f9f4 !important;
+        }
+        
+        .completed-lesson.latest {
+            background: #d4edda !important;
+            font-weight: 500;
+        }
+        
+        .completed-lesson:hover {
+            background: #e8f5ee !important;
+        }
+        
+        .completed-item-number {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+        
+        .completed-item-title {
+            color: #495057;
+            line-height: 1.4;
+            margin-bottom: 6px;
+        }
+        
+        .completed-item-date {
+            color: #6c757d;
+            font-size: 0.85em;
+            font-style: italic;
+        }
+        
+        .completed-item-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        
+        .no-completed {
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            padding: 20px 10px;
+        }
+        
+        .lesson-date {
+            color: #6c757d;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+        
+        .student-info {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .student-info h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .progress-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .progress-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .progress-card h4 {
+            color: #495057;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        
+        .theme-section {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .current-lesson-highlight {
+            background: #fff3cd !important;
+            border-left: 4px solid #ffc107 !important;
+        }
+        
+        .current-lesson-highlight:hover {
+            background: #ffe69c !important;
+        }
+        
+        .current-lesson-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: #212529;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .theme-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 1.2em;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .theme-header:hover {
+            opacity: 0.9;
+        }
+        
+        .theme-header .toggle-icon {
+            transition: transform 0.3s;
+        }
+        
+        .theme-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .lessons-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .lessons-table thead {
+            background: #f8f9fa;
+        }
+        
+        .lessons-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .lessons-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .lessons-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .checkbox-cell {
+            text-align: center;
+        }
+        
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+        
+        .lesson-number {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .lesson-title {
+            color: #212529;
+        }
+        
+        .theme-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .theme-content.collapsed {
+            max-height: 0;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            border-top: 2px solid #e9ecef;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .controls, .footer {
+                display: none;
+            }
+            
+            .container {
+                box-shadow: none;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .completed-themes-sidebar {
+                position: static;
+                max-height: 400px;
+                order: 2;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .control-row {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .student-selector,
+            .add-student-form {
+                width: 100%;
+                max-width: none;
+            }
+            
+            .student-selector select,
+            .add-student-form input {
+                max-width: none;
+            }
+            
+            .button-group {
+                width: 100%;
+            }
+            
+            .btn {
+                flex: 1;
+            }
+            
+            .theme-header {
+                font-size: 1em;
+                padding: 12px 15px;
+            }
+            
+            .theme-header > div > div {
+                flex-direction: column !important;
+                gap: 5px !important;
+                align-items: flex-start !important;
+            }
+            
+            .theme-header > div > div > span {
+                font-size: 0.8em;
+            }
+            
+            .completed-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div class="app-header">
-  <h1>&#128221; Dictees Toets Taal Compleet</h1>
-  <p>Maak en deel dictees met je klas</p>
-</div>
-
-<div class="tabs">
-  <button class="tab-btn tab-teacher" onclick="showTab('teacher')">&#128105;&#8205;&#127979; Leerkracht</button>
-  <button class="tab-btn tab-student active" onclick="showTab('student')">&#127978; Leerling</button>
-</div>
-
-<!-- LEERKRACHT -->
-<div id="teacher-panel">
-  <div class="card">
-    <h2>&#9999;&#65039; Nieuw dictee maken</h2>
-    <div id="create-alert" class="alert hidden"></div>
-    <div class="field-row">
-      <label class="field-label">Titel van het dictee</label>
-      <input type="text" id="dictee-title" placeholder="bijv. Week 12 - ei/ij woorden" maxlength="60">
+    <div id="loginScreen" style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 400px; width: 90%;">
+            <h1 style="color: #667eea; margin-bottom: 10px; text-align: center; font-size: 2em;">🔒 Aftekenlijst A1</h1>
+            <p style="color: #6c757d; text-align: center; margin-bottom: 30px;">Voer het wachtwoord in om toegang te krijgen</p>
+            <form onsubmit="checkPassword(event)" style="display: flex; flex-direction: column; gap: 15px;">
+                <input 
+                    type="password" 
+                    id="passwordInput" 
+                    placeholder="Wachtwoord" 
+                    style="padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 1em; width: 100%;"
+                    autofocus
+                >
+                <button 
+                    type="submit" 
+                    style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(102, 126, 234, 0.3)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                >
+                    🔓 Inloggen
+                </button>
+                <div id="errorMessage" style="color: #dc3545; text-align: center; font-size: 0.9em; display: none; margin-top: 5px;">
+                    ❌ Onjuist wachtwoord. Probeer opnieuw.
+                </div>
+            </form>
+        </div>
     </div>
-    <div class="field-row">
-      <label class="field-label">Woorden (een per regel, max. 30)</label>
-      <textarea id="words-input" placeholder="Plak of typ hier de woorden:&#10;fiets&#10;school&#10;schrijven&#10;..."></textarea>
-      <p class="hint">&#128161; Kopieer de woorden uit je methode en plak ze hier</p>
+    
+    <div id="mainContent" style="display: none;">
+    <div class="container">
+        <div class="header">
+            <h1>📚 Aftekenlijst Taalcompleet A1</h1>
+            <p>Voortgang bijhouden per leerling</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-row">
+                <div class="student-selector">
+                    <label for="studentSelect">Selecteer leerling:</label>
+                    <select id="studentSelect">
+                        <option value="">-- Kies een leerling --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content" id="content">
+            <div class="student-info">
+                <h2>Welkom!</h2>
+                <p>Selecteer een leerling hierboven om de voortgang bij te houden.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div style="border-top: 2px solid #e9ecef; padding-top: 20px; margin-bottom: 20px;">
+                <h3 style="color: #667eea; margin-bottom: 15px; text-align: center;">🔧 Beheer Opties</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <div class="add-student-form" style="max-width: 500px; margin: 0 auto;">
+                        <input type="text" id="newStudentName" placeholder="Naam nieuwe leerling..." maxlength="50" style="flex: 1; padding: 10px 15px; border: 2px solid #dee2e6; border-radius: 8px;">
+                        <button class="btn btn-success" onclick="addStudent()">➕ Voeg Leerling Toe</button>
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 15px;">
+                    <button class="btn btn-info" onclick="renameStudent()">✏️ Wijzig Naam</button>
+                    <button class="btn btn-warning" onclick="deleteStudent()">🗑️ Verwijder Leerling</button>
+                    <button class="btn btn-danger" onclick="resetStudent()">🔄 Reset Voortgang</button>
+                </div>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                    <button class="btn btn-primary" onclick="exportData()">💾 Exporteer Leerling</button>
+                    <button class="btn btn-secondary" onclick="importData()">📥 Importeer Leerling</button>
+                    <button class="btn btn-primary" onclick="exportAllStudents()">📦 Exporteer Alle Leerlingen</button>
+                    <button class="btn btn-secondary" onclick="importAllStudents()">📥 Importeer Groep</button>
+                </div>
+            </div>
+            
+            <p>🔥 Cloud opslag actief via Firebase Firestore • Alle wijzigingen worden automatisch gesynchroniseerd</p>
+            <p>💡 Deel dit bestand met collega's om samen in dezelfde database te werken</p>
+        </div>
     </div>
-    <div class="speed-row">
-      <label>&#128034; Spreeksnelheid</label>
-      <input type="range" id="speed-slider" min="0.4" max="1.0" step="0.05" value="0.6" oninput="updateSpeedLabel()">
-      <span class="speed-val" id="speed-val">Duidelijk</span>
+    
     </div>
-    <div class="btn-row">
-      <button class="btn btn-blue" onclick="saveDictee()">&#128190; Opslaan</button>
-      <button class="btn btn-outline" onclick="clearForm()">&#128465; Wissen</button>
     </div>
-  </div>
-
-  <div class="card" id="jsonbin-card" style="display:none">
-    <h2>&#9881;&#65039; Online opslag instellen</h2>
-    <div id="jsonbin-alert" class="alert hidden"></div>
-    <p style="font-size:.88rem;color:var(--gray);font-weight:600;margin-bottom:14px">Vul je JSONBin gegevens in om dictees online op te slaan. Zo zien alle collega's en browsers dezelfde dictees.</p>
-    <div class="field-row">
-      <label class="field-label">BIN ID</label>
-      <input type="text" id="jb-bin-id" placeholder="bijv. 6789abc123def456..." maxlength="40">
-    </div>
-    <div class="field-row">
-      <label class="field-label">API Key</label>
-      <input type="text" id="jb-api-key" placeholder="bijv. $2b$10$..." maxlength="120">
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-blue" onclick="saveJsonBinSettings()">&#128279; Verbinding maken</button>
-      <button class="btn btn-outline" onclick="clearJsonBinSettings()">&#10006; Verwijderen</button>
-    </div>
-    <div id="jb-status" style="margin-top:12px;font-size:.85rem;font-weight:700;color:var(--gray);text-align:center"></div>
-  </div>
-
-  <div class="card">
-    <h2>&#128193; Opgeslagen dictees</h2>
-    <div id="saved-list"></div>
-    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
-      <button class="btn btn-outline" onclick="exportDictees()" style="flex:1;font-size:.95rem">&#11014;&#65039; Exporteren</button>
-      <label class="btn btn-outline" style="flex:1;font-size:.95rem;cursor:pointer;justify-content:center">
-        &#11015;&#65039; Importeren
-        <input type="file" id="import-file" accept=".json" onchange="importDictees(event)" style="display:none">
-      </label>
-    </div>
-    <p style="font-size:.78rem;color:var(--gray);font-weight:600;margin-top:8px;text-align:center" id="sync-hint"></p>
-  </div>
-</div>
-
-<!-- LEERLING -->
-<div id="student-panel">
-  <div class="card" id="selector-card">
-    <h2>&#127978; Kies een dictee</h2>
-    <div id="student-list"></div>
-    <div id="start-row" class="hidden" style="margin-top:16px">
-      <button class="btn btn-blue" style="width:100%;font-size:1.3rem;padding:16px" onclick="startDictee()">&#9654;&#65039; Dictee starten</button>
-      <div style="background:#fef3c7;border-radius:14px;padding:12px 16px;margin-top:12px;display:flex;align-items:center;gap:12px">
-        <label style="font-weight:700;color:#92400e;font-size:.9rem;white-space:nowrap">&#128266; Snelheid</label>
-        <input type="range" id="student-speed" min="0.4" max="1.0" step="0.05" value="1.0" oninput="updateStudentSpeed()" style="flex:1;accent-color:#fbbf24">
-        <span style="font-family:Fredoka One,cursive;color:#b45309;min-width:70px;text-align:right;font-size:1rem" id="student-speed-val">Snel</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card" id="player">
-    <div class="prog-wrap"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
-    <div class="prog-label" id="prog-label">Woord 1 van ?</div>
-    <div class="big-num" id="big-num">1</div>
-    <div class="word-hint">Druk op de knop om het woord te horen</div>
-    <button class="speak-btn" id="speak-btn" onclick="speakWord()">&#128266;</button>
-    <div class="speak-lbl" id="speak-lbl">Klik om het woord te horen</div>
-    <div style="background:#fef3c7;border-radius:14px;padding:10px 16px;margin:12px 0;display:flex;align-items:center;gap:12px">
-      <label style="font-weight:700;color:#92400e;font-size:.9rem;white-space:nowrap">&#128266; Snelheid</label>
-      <input type="range" id="player-speed" min="0.4" max="1.0" step="0.05" value="1.0" oninput="updatePlayerSpeed()" style="flex:1;accent-color:#fbbf24">
-      <span style="font-family:Fredoka One,cursive;color:#b45309;min-width:70px;text-align:right;font-size:1rem" id="player-speed-val">Snel</span>
-    </div>
-    <div class="player-nav">
-      <button class="nbtn nprev" id="nav-prev" onclick="prevWord()">&#8592; Vorige</button>
-      <button class="nbtn nnext" id="nav-next" onclick="nextWord()">Volgende &#8594;</button>
-      <button class="nbtn ndone hidden" id="nav-done" onclick="finishDictee()">&#9989; Klaar!</button>
-    </div>
-    <div><span class="back-link" onclick="backToSelector()">&#8617; Terug naar keuze</span></div>
-  </div>
-
-  <div class="card" id="done-card">
-    <div class="done-emoji">&#127881;</div>
-    <div class="done-stars">&#11088;&#11088;&#11088;</div>
-    <div class="done-title">Dictee klaar!</div>
-    <div class="done-sub" id="done-sub">Goed gedaan!</div>
-    <div class="done-btns">
-      <button class="btn btn-blue" onclick="restartDictee()">&#128260; Opnieuw</button>
-      <button class="btn btn-outline" onclick="backToSelector()">&#128193; Ander dictee</button>
-    </div>
-  </div>
-</div>
-
-<!-- WACHTWOORD MODAL -->
-<div class="modal-backdrop hidden" id="pw-modal">
-  <div class="modal" style="max-width:380px;text-align:center">
-    <div style="font-size:3rem;margin-bottom:8px">🔒</div>
-    <h2 style="justify-content:center;margin-bottom:8px">Leerkracht inloggen</h2>
-    <p style="color:var(--gray);font-weight:600;font-size:.9rem;margin-bottom:16px">Voer het wachtwoord in om verder te gaan</p>
-    <input type="password" id="pw-input" placeholder="Wachtwoord" onkeydown="if(event.key==='Enter')checkPassword()">
-    <div class="pw-error hidden" id="pw-error">❌ Onjuist wachtwoord, probeer opnieuw.</div>
-    <div style="display:flex;gap:10px;margin-top:16px">
-      <button class="btn btn-blue" onclick="checkPassword()" style="flex:1">🔓 Inloggen</button>
-      <button class="btn btn-outline" onclick="closePwModal()">Annuleren</button>
-    </div>
-  </div>
-</div>
-
-<!-- WIJZIG MODAL -->
-<div class="modal-backdrop hidden" id="edit-modal">
-  <div class="modal">
-    <h2>&#9999;&#65039; Dictee wijzigen</h2>
-    <div id="edit-alert" class="alert hidden"></div>
-    <div class="field-row">
-      <label class="field-label">Titel van het dictee</label>
-      <input type="text" id="edit-title" placeholder="Titel..." maxlength="60">
-    </div>
-    <div class="field-row">
-      <label class="field-label">Woorden (een per regel, max. 30)</label>
-      <textarea id="edit-words" style="min-height:160px" placeholder="fiets&#10;school&#10;schrijven&#10;..."></textarea>
-    </div>
-    <div class="speed-row">
-      <label>&#128034; Spreeksnelheid</label>
-      <input type="range" id="edit-speed" min="0.4" max="1.0" step="0.05" value="0.6" oninput="updateEditSpeedLabel()">
-      <span class="speed-val" id="edit-speed-val">Duidelijk</span>
-    </div>
-    <div class="modal-btns">
-      <button class="btn btn-green" onclick="saveEdit()">&#128190; Wijzigingen opslaan</button>
-      <button class="btn btn-outline" onclick="closeEdit()">Annuleren</button>
-    </div>
-  </div>
-</div>
-
-<script>
-var STORAGE_KEY = 'dicteeApp_v2';
-var dictees = [];
-var currentDictee = null;
-var currentIndex = 0;
-var selectedId = null;
-var editingId = null;
-
-var JB_KEY = 'jsonbin_v1';
-
-function getJbConfig() {
-  // Vaste verbinding - hoeft niet ingesteld te worden
-  return { binId: '69aebe45d0ea881f40003428', apiKey: '$2a$10$RLtKp3BpaiUi6TqRsnW.3.C3zkJfGzSWGwFXg2GOrjBbwGMJpcjf6' };
-}
-
-function sortDictees() {
-  dictees.sort(function(a, b) { return a.title.localeCompare(b.title, "nl", {sensitivity: "base"}); });
-}
-
-function loadAll() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-  catch(e) { return []; }
-}
-
-function saveAll() {
-  sortDictees();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
-  var cfg = getJbConfig();
-  if (cfg) pushToJsonBin(cfg);
-}
-
-function pushToJsonBin(cfg) {
-  fetch('https://api.jsonbin.io/v3/b/' + cfg.binId, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'X-Master-Key': cfg.apiKey },
-    body: JSON.stringify(dictees)
-  }).catch(function(e) { console.warn('JSONBin sync failed', e); });
-}
-
-function fetchFromJsonBin(cfg, onDone) {
-  setJbStatus('⏳ Verbinding maken...', 'var(--gray)');
-  showAlert('jsonbin-alert', '⏳ Bezig met verbinden...', 'green');
-  fetch('https://api.jsonbin.io/v3/b/' + cfg.binId + '/latest', {
-    headers: { 'X-Master-Key': cfg.apiKey, 'X-Bin-Meta': 'false' }
-  })
-  .then(function(r) {
-    if (r.status === 401) throw new Error('API Key klopt niet (401). Gebruik de „X-Master-Key” uit het API Keys menu.');
-    if (r.status === 404) throw new Error('BIN ID niet gevonden (404). Controleer het BIN ID.');
-    if (r.status === 403) throw new Error('Geen toegang (403). Zorg dat de bin op Private staat en de key klopt.');
-    if (!r.ok) throw new Error('Fout van JSONBin: HTTP ' + r.status);
-    return r.json();
-  })
-  .then(function(data) {
-    var remote = Array.isArray(data) ? data : (data.record || data);
-    if (!Array.isArray(remote)) throw new Error('Onverwacht formaat ontvangen van JSONBin.');
-    // Filter out init placeholder
-    remote = remote.filter(function(d){ return d.id !== "init"; });
-    dictees = remote;
-    sortDictees();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
-    setJbStatus('✅ Verbonden — dictees worden online opgeslagen', 'var(--green-dark)');
-    updateSyncHint(true);
-    renderSavedList();
-    renderStudentList();
-    showAlert('jsonbin-alert', '✅ Verbonden! Dictees worden nu online opgeslagen.', 'green');
-    if (onDone) onDone(true);
-  })
-  .catch(function(err) {
-    var msg = err.message || 'Onbekende fout';
-    setJbStatus('❌ ' + msg, 'var(--red)');
-    showAlert('jsonbin-alert', '❌ ' + msg);
-    if (onDone) onDone(false);
-  });
-}
-
-function setJbStatus(msg, color) {
-  var el = document.getElementById('jb-status');
-  if (el) { el.innerHTML = msg; el.style.color = color || 'var(--gray)'; }
-}
-
-function updateSyncHint(online) {
-  var el = document.getElementById('sync-hint');
-  if (!el) return;
-  if (online) {
-    el.innerHTML = '&#9729;&#65039; Online opgeslagen &#8212; zichtbaar voor alle collega&#39;s';
-  } else {
-    el.innerHTML = '&#128161; Exporteer in Chrome, importeer in Edge &#8212; en andersom';
-  }
-}
-
-function saveJsonBinSettings() {
-  var binId = document.getElementById('jb-bin-id').value.trim();
-  var apiKey = document.getElementById('jb-api-key').value.trim();
-  var alertEl = document.getElementById('jsonbin-alert');
-  var statusEl = document.getElementById('jb-status');
-
-  alertEl.className = 'alert alert-green';
-  alertEl.innerHTML = '⏳ Stap 1: velden controleren...';
-  alertEl.classList.remove('hidden');
-
-  if (!binId) {
-    alertEl.className = 'alert alert-red';
-    alertEl.innerHTML = '❌ BIN ID is leeg. Vul het BIN ID in.';
-    return;
-  }
-  if (!apiKey) {
-    alertEl.className = 'alert alert-red';
-    alertEl.innerHTML = '❌ API Key is leeg. Vul de API Key in.';
-    return;
-  }
-
-  alertEl.innerHTML = '⏳ Stap 2: instellingen opslaan...';
-  var cfg = { binId: binId, apiKey: apiKey };
-  try {
-    localStorage.setItem(JB_KEY, JSON.stringify(cfg));
-    alertEl.innerHTML = '⏳ Stap 3: verbinding testen met JSONBin...';
-  } catch(e) {
-    alertEl.className = 'alert alert-red';
-    alertEl.innerHTML = '❌ Kon instellingen niet opslaan: ' + e.message;
-    return;
-  }
-
-  var url = 'https://api.jsonbin.io/v3/b/' + binId + '/latest';
-  alertEl.innerHTML = '⏳ Stap 4: verzoek sturen naar ' + url;
-
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'X-Master-Key': apiKey,
-      'X-Bin-Meta': 'false'
-    }
-  })
-  .then(function(r) {
-    alertEl.innerHTML = '⏳ Stap 5: antwoord ontvangen (HTTP ' + r.status + ')';
-    if (r.status === 401) throw new Error('HTTP 401 — API Key klopt niet. Gebruik de X-Master-Key.');
-    if (r.status === 403) throw new Error('HTTP 403 — Geen toegang. Controleer de API Key.');
-    if (r.status === 404) throw new Error('HTTP 404 — BIN ID niet gevonden. Controleer het BIN ID.');
-    if (!r.ok) throw new Error('HTTP ' + r.status + ' — onbekende fout van JSONBin.');
-    return r.json();
-  })
-  .then(function(data) {
-    alertEl.innerHTML = '⏳ Stap 6: gegevens verwerken...';
-    var remote = Array.isArray(data) ? data : (data.record || data);
-    if (!Array.isArray(remote)) throw new Error('JSONBin stuurde geen lijst terug. Inhoud bin moet [] zijn.');
-    remote = remote.filter(function(d){ return d.id !== 'init'; });
-    dictees = remote;
-    sortDictees();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
-    alertEl.className = 'alert alert-green';
-    alertEl.innerHTML = '✅ Verbonden! ' + dictees.length + ' dictee(s) geladen. Alles werkt!';
-    statusEl.innerHTML = '✅ Online verbonden';
-    statusEl.style.color = 'var(--green-dark)';
-    updateSyncHint(true);
-    renderSavedList();
-    renderStudentList();
-  })
-  .catch(function(err) {
-    alertEl.className = 'alert alert-red';
-    alertEl.innerHTML = '❌ Mislukt bij stap: ' + err.message;
-    statusEl.innerHTML = '❌ Niet verbonden';
-    statusEl.style.color = 'var(--red)';
-  });
-}
-
-function clearJsonBinSettings() {
-  if (!confirm('Online verbinding verwijderen? Dictees blijven lokaal bewaard.')) return;
-  localStorage.removeItem(JB_KEY);
-  document.getElementById('jb-bin-id').value = '';
-  document.getElementById('jb-api-key').value = '';
-  setJbStatus('', '');
-  updateSyncHint(false);
-}
-
-function initJsonBin() {
-  var cfg = getJbConfig();
-  if (!cfg) { updateSyncHint(false); return; }
-  // Vul velden in als ze beschikbaar zijn (leerkrachtpaneel)
-  var binEl = document.getElementById('jb-bin-id');
-  var keyEl = document.getElementById('jb-api-key');
-  if (binEl) binEl.value = cfg.binId;
-  if (keyEl) keyEl.value = cfg.apiKey;
-  // Laad altijd dictees van JSONBin, ook voor leerlingen
-  loadFromJsonBinSilent(cfg);
-}
-
-function loadFromJsonBinSilent(cfg) {
-  fetch('https://api.jsonbin.io/v3/b/' + cfg.binId + '/latest', {
-    method: 'GET',
-    headers: { 'X-Master-Key': cfg.apiKey, 'X-Bin-Meta': 'false' }
-  })
-  .then(function(r) {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  })
-  .then(function(data) {
-    var remote = Array.isArray(data) ? data : (data.record || data);
-    if (!Array.isArray(remote)) throw new Error('Geen lijst');
-    remote = remote.filter(function(d){ return d.id !== 'init'; });
-    dictees = remote;
-    sortDictees();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dictees));
-    updateSyncHint(true);
-    setJbStatus('&#9989; Verbonden &#8212; dictees worden online opgeslagen', 'var(--green-dark)');
-    renderSavedList();
-    renderStudentList();
-  })
-  .catch(function(e) {
-    // Stil falen: gebruik lokale data als fallback
-    console.warn('JSONBin laden mislukt, lokale data gebruikt:', e.message);
-    updateSyncHint(false);
-  });
-}
-
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-var teacherUnlocked = false;
-
-function showTab(tab) {
-  if (tab === 'teacher' && !teacherUnlocked) {
-    document.getElementById('pw-input').value = '';
-    document.getElementById('pw-error').classList.add('hidden');
-    document.getElementById('pw-modal').classList.remove('hidden');
-    setTimeout(function(){ document.getElementById('pw-input').focus(); }, 100);
-    return;
-  }
-  document.getElementById('teacher-panel').style.display = tab === 'teacher' ? 'block' : 'none';
-  document.getElementById('student-panel').style.display = tab === 'student' ? 'block' : 'none';
-  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
-  document.querySelector('.tab-' + tab).classList.add('active');
-  if (tab === 'student') { teacherUnlocked = false; renderStudentList(); }
-}
-
-function checkPassword() {
-  var pw = document.getElementById('pw-input').value;
-  if (pw === 'ISK2026!') {
-    teacherUnlocked = true;
-    document.getElementById('pw-modal').classList.add('hidden');
-    document.getElementById('teacher-panel').style.display = 'block';
-    document.getElementById('student-panel').style.display = 'none';
-    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
-    document.querySelector('.tab-teacher').classList.add('active');
-  } else {
-    document.getElementById('pw-error').classList.remove('hidden');
-    document.getElementById('pw-input').value = '';
-    document.getElementById('pw-input').focus();
-  }
-}
-
-function closePwModal() {
-  document.getElementById('pw-modal').classList.add('hidden');
-}
-
-document.getElementById('pw-modal').addEventListener('click', function(e) {
-  if (e.target === this) closePwModal();
-});
-
-function speedLabel(v) {
-  var map = [[0.4,'Heel langzaam'],[0.5,'Langzaam'],[0.6,'Duidelijk'],[0.75,'Normaal'],[0.875,'Vlot'],[1.0,'Snel']];
-  return map.reduce(function(a,b){ return Math.abs(b[0]-v) < Math.abs(a[0]-v) ? b : a; })[1];
-}
-function updateSpeedLabel() {
-  document.getElementById('speed-val').textContent = speedLabel(parseFloat(document.getElementById('speed-slider').value));
-}
-function updateEditSpeedLabel() {
-  document.getElementById('edit-speed-val').textContent = speedLabel(parseFloat(document.getElementById('edit-speed').value));
-}
-
-function showAlert(elId, msg, type) {
-  var el = document.getElementById(elId);
-  el.className = 'alert alert-' + (type || 'red');
-  el.textContent = msg;
-  el.classList.remove('hidden');
-  if (type === 'green') setTimeout(function(){ el.classList.add('hidden'); }, 3500);
-}
-
-function saveDictee() {
-  var title = document.getElementById('dictee-title').value.trim();
-  var raw = document.getElementById('words-input').value;
-  var speed = parseFloat(document.getElementById('speed-slider').value);
-  var words = raw.split('\n').map(function(w){ return w.trim(); }).filter(function(w){ return w.length > 0; });
-  if (!title) { showAlert('create-alert','Geef het dictee een titel!'); return; }
-  if (!words.length) { showAlert('create-alert','Voer minstens een woord in!'); return; }
-  if (words.length > 30) { showAlert('create-alert','Maximaal 30 woorden toegestaan!'); return; }
-  dictees.push({ id: Date.now().toString(), title: title, words: words, speed: speed, created: new Date().toLocaleDateString('nl-NL') });
-  saveAll();
-  renderSavedList();
-  showAlert('create-alert', '"' + title + '" opgeslagen!', 'green');
-  clearForm();
-}
-
-function clearForm() {
-  document.getElementById('dictee-title').value = '';
-  document.getElementById('words-input').value = '';
-  document.getElementById('speed-slider').value = 0.8;
-  updateSpeedLabel();
-}
-
-function renderSavedList() {
-  var el = document.getElementById('saved-list');
-  if (!dictees.length) {
-    el.innerHTML = '<div class="empty-state"><span class="emoji">&#128461;</span>Nog geen dictees opgeslagen</div>';
-    return;
-  }
-  var html = '<div class="saved-list-wrap">';
-  dictees.forEach(function(d) {
-    html += '<div class="saved-item">' +
-      '<div style="flex:1;min-width:0">' +
-        '<div class="saved-item-title">' + escHtml(d.title) + '</div>' +
-        '<div class="saved-item-meta">' + d.words.length + ' woorden &bull; ' + d.created + '</div>' +
-      '</div>' +
-      '<div class="saved-item-btns">' +
-        '<button class="icon-btn ib-blue" onclick="openEdit(\'' + d.id + '\')" title="Wijzigen">&#9999;&#65039;</button>' +
-        '<button class="icon-btn ib-green" onclick="downloadDictee(\'' + d.id + '\')" title="Downloaden voor Teams">&#11015;&#65039;</button>' +
-        '<button class="icon-btn ib-red" onclick="deleteDictee(\'' + d.id + '\')" title="Verwijderen">&#128465;</button>' +
-      '</div>' +
-    '</div>';
-  });
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-function exportDictees() {
-  if (!dictees.length) { alert('Er zijn geen dictees om te exporteren.'); return; }
-  var data = JSON.stringify(dictees, null, 2);
-  var blob = new Blob([data], { type: 'application/json' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'dictees_export.json';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function importDictees(event) {
-  var file = event.target.files[0];
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var imported = JSON.parse(e.target.result);
-      if (!Array.isArray(imported)) throw new Error();
-      var newCount = 0;
-      imported.forEach(function(d) {
-        if (d.id && d.title && d.words) {
-          var exists = dictees.find(function(x) { return x.id === d.id; });
-          if (!exists) { dictees.push(d); newCount++; }
+    
+    <input type="file" id="importFile" style="display: none;" accept=".json">
+    <input type="file" id="importGroupFile" style="display: none;" accept=".json">
+    
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc, query, where, writeBatch } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Firebase configuratie
+        const firebaseConfig = {
+            apiKey: "AIzaSyCG8sgm-iY3NjwT85MVLmp3e9SG97jcD9I",
+            authDomain: "aftekenlijst-taalcompleet-a1.firebaseapp.com",
+            projectId: "aftekenlijst-taalcompleet-a1",
+            storageBucket: "aftekenlijst-taalcompleet-a1.firebasestorage.app",
+            messagingSenderId: "92737770661",
+            appId: "1:92737770661:web:a0ed26e47617043a27294c"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let isSyncing = false;
+        
+        const CORRECT_PASSWORD = 'ISK2026!';
+        
+        // Maak functies globaal beschikbaar
+        window.checkPassword = function(event) {
+            event.preventDefault();
+            const password = document.getElementById('passwordInput').value;
+            
+            console.log('Ingevoerd wachtwoord:', password);
+            console.log('Verwacht wachtwoord:', CORRECT_PASSWORD);
+            console.log('Match:', password === CORRECT_PASSWORD);
+            
+            if (password === CORRECT_PASSWORD) {
+                console.log('✅ Wachtwoord correct!');
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                sessionStorage.setItem('authenticated', 'true');
+                initStudents();
+                loadFromFirebase();
+            } else {
+                console.log('❌ Wachtwoord incorrect!');
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+                
+                setTimeout(() => {
+                    errorMsg.style.display = 'none';
+                }, 3000);
+            }
         }
-      });
-      saveAll();
-      renderSavedList();
-      showAlert('create-alert', '✅ ' + newCount + ' dictee(s) geïmporteerd!', 'green');
-    } catch(err) {
-      showAlert('create-alert', '❌ Ongeldig bestand. Gebruik een geëxporteerd .json bestand.');
-    }
-    event.target.value = '';
-  };
-  reader.readAsText(file);
-}
-
-function deleteDictee(id) {
-  if (!confirm('Dit dictee verwijderen?')) return;
-  dictees = dictees.filter(function(d){ return d.id !== id; });
-  saveAll();
-  renderSavedList();
-}
-
-function openEdit(id) {
-  var d = dictees.find(function(x){ return x.id === id; });
-  if (!d) return;
-  editingId = id;
-  document.getElementById('edit-title').value = d.title;
-  document.getElementById('edit-words').value = d.words.join('\n');
-  document.getElementById('edit-speed').value = d.speed || 0.8;
-  updateEditSpeedLabel();
-  document.getElementById('edit-alert').classList.add('hidden');
-  document.getElementById('edit-modal').classList.remove('hidden');
-}
-
-function closeEdit() {
-  editingId = null;
-  document.getElementById('edit-modal').classList.add('hidden');
-}
-
-function saveEdit() {
-  var title = document.getElementById('edit-title').value.trim();
-  var raw = document.getElementById('edit-words').value;
-  var speed = parseFloat(document.getElementById('edit-speed').value);
-  var words = raw.split('\n').map(function(w){ return w.trim(); }).filter(function(w){ return w.length > 0; });
-  if (!title) { showAlert('edit-alert','Geef het dictee een titel!'); return; }
-  if (!words.length) { showAlert('edit-alert','Voer minstens een woord in!'); return; }
-  if (words.length > 30) { showAlert('edit-alert','Maximaal 30 woorden toegestaan!'); return; }
-  var i = dictees.findIndex(function(d){ return d.id === editingId; });
-  if (i === -1) return;
-  dictees[i].title = title;
-  dictees[i].words = words;
-  dictees[i].speed = speed;
-  saveAll();
-  renderSavedList();
-  closeEdit();
-}
-
-document.getElementById('edit-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeEdit();
-});
-
-function downloadDictee(id) {
-  var d = dictees.find(function(x){ return x.id === id; });
-  if (!d) return;
-  var html = buildStudentFile(d);
-  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'dictee_' + d.title.replace(/[^a-zA-Z0-9]/g,'_') + '.html';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function buildStudentFile(d) {
-  var wj = JSON.stringify(d.words);
-  var sp = d.speed || 0.6;
-  var ti = escHtml(d.title);
-  var n = d.words.length;
-  return '<!DOCTYPE html>\n<html lang="nl">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0">\n<title>Dictee - ' + ti + '</title>\n<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">\n<style>\n*{box-sizing:border-box;margin:0;padding:0}\nbody{font-family:Nunito,sans-serif;background:#f0f9ff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px;background-image:radial-gradient(circle at 20% 20%,#bfdbfe55,transparent 50%),radial-gradient(circle at 80% 80%,#ddd6fe55,transparent 50%)}\nh1{font-family:"Fredoka One",cursive;font-size:2.2rem;color:#1d4ed8;margin-bottom:4px;text-align:center}\n.sub{color:#6b7280;font-weight:700;margin-bottom:28px;text-align:center}\n.card{background:white;border-radius:24px;padding:28px;width:100%;max-width:460px;box-shadow:0 8px 30px rgba(59,130,246,.12);text-align:center}\n.pw{background:#e0e9ff;border-radius:20px;height:10px;overflow:hidden;margin-bottom:6px}\n.pf{height:100%;background:linear-gradient(90deg,#3b82f6,#8b5cf6);border-radius:20px;transition:width .5s}\n.pl{font-size:.85rem;font-weight:700;color:#6b7280;margin-bottom:20px}\n.bn{font-family:"Fredoka One",cursive;font-size:6rem;line-height:1;color:#3b82f6;margin-bottom:6px}\n.bn.pop{animation:pop .3s ease}\n@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}\n.wh{font-size:.95rem;font-weight:700;color:#6b7280;margin-bottom:28px}\n.sb{width:130px;height:130px;border-radius:50%;border:none;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:white;font-size:3.2rem;cursor:pointer;box-shadow:0 8px 25px rgba(59,130,246,.4);transition:transform .15s;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}\n.sb:hover{transform:scale(1.05)}.sb:active{transform:scale(.96)}\n.sb.sp{animation:ring 1.2s infinite}\n@keyframes ring{0%{box-shadow:0 0 0 0 rgba(59,130,246,.5)}70%{box-shadow:0 0 0 20px rgba(59,130,246,0)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}}\n.sl{font-size:.85rem;font-weight:700;color:#6b7280;margin-bottom:22px}\n.nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}\n.nb{padding:11px 22px;border-radius:12px;font-family:Nunito,sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;border:2px solid;transition:all .15s}\n.np{border-color:#d1d5db;color:#6b7280;background:white}.np:hover{background:#f3f4f6}\n.nn{border-color:#22c55e;background:#22c55e;color:white}.nn:hover{background:#15803d}\n.nd{border-color:#fbbf24;background:#fbbf24;color:#78350f}.nd:hover{background:#f59e0b}\n.hidden{display:none!important}\n#done{display:none;text-align:center}\n.de{font-size:4rem;margin-bottom:10px}.ds{font-size:2rem;letter-spacing:6px;margin-bottom:14px}\n.dt{font-family:"Fredoka One",cursive;font-size:2rem;color:#15803d;margin-bottom:6px}\n.dm{color:#6b7280;font-weight:600;margin-bottom:24px}\n.ag{padding:13px 30px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;border:none;border-radius:14px;font-family:"Fredoka One",cursive;font-size:1.2rem;cursor:pointer;transition:transform .15s}.ag:hover{transform:translateY(-2px)}\n</style>\n</head>\n<body>\n<h1>&#128221; Dictee</h1>\n<p class="sub">' + ti + '</p>\n<div class="card" id="pc">\n<div class="pw"><div class="pf" id="pf" style="width:0%"></div></div>\n<div class="pl" id="pl">Woord 1 van ' + n + '</div>\n<div class="bn" id="bn">1</div>\n<div class="wh">Druk op de knop om het woord te horen</div>\n<button class="sb" id="sb" onclick="speak()">&#128266;</button>\n<div class="sl" id="sl">Klik om het woord te horen</div>\n<div class="nav">\n<button class="nb np" id="np" onclick="prev()">&#8592; Vorige</button>\n<button class="nb nn" id="nn" onclick="nxt()">Volgende &#8594;</button>\n<button class="nb nd hidden" id="nd" onclick="fin()">&#9989; Klaar!</button>\n</div>\n</div>\n<div class="card" id="done">\n<div class="de">&#127881;</div><div class="ds">&#11088;&#11088;&#11088;</div>\n<div class="dt">Dictee klaar!</div>\n<div class="dm">Alle ' + n + ' woorden zijn voorgelezen!</div>\n<button class="ag" onclick="restart()">&#128260; Opnieuw</button>\n</div>\n<script>\nvar W=' + wj + ',S=' + sp + ',i=0;\nfunction ui(){var n=i+1,t=W.length;document.getElementById("pl").textContent="Woord "+n+" van "+t;document.getElementById("pf").style.width=((i/t)*100)+"%";var b=document.getElementById("bn");b.textContent=n;b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop");document.getElementById("np").style.visibility=i===0?"hidden":"visible";var L=i===t-1;document.getElementById("nn").classList.toggle("hidden",L);document.getElementById("nd").classList.toggle("hidden",!L);var sb=document.getElementById("sb");sb.classList.remove("sp");sb.textContent="\\u{1F50A}";document.getElementById("sl").textContent="Klik om het woord te horen";}\nfunction getBestVoice(){var vs=window.speechSynthesis.getVoices();var pref=["Microsoft Mila","Google Nederlands","nl-NL-Standard","Xander"];for(var p=0;p<pref.length;p++){var m=vs.find(function(v){return v.name.indexOf(pref[p])!==-1;});if(m)return m;}return vs.find(function(v){return v.lang==="nl-NL";})||vs.find(function(v){return v.lang.startsWith("nl");})||null;}function speak(){window.speechSynthesis.cancel();var word=W[i];var voice=getBestVoice();var sb=document.getElementById("sb");sb.classList.add("sp");sb.textContent="\\u{1F508}";document.getElementById("sl").textContent="Bezig met voorlezen...";function mkU(t,cb){var u=new SpeechSynthesisUtterance(t);u.lang="nl-NL";u.rate=S;u.pitch=1.0;u.volume=1.0;if(voice)u.voice=voice;u.onend=cb;return u;}var u1=mkU(word,function(){setTimeout(function(){var u2=mkU(word,function(){sb.classList.remove("sp");sb.textContent="\\u{1F50A}";document.getElementById("sl").textContent="Klik opnieuw om te herhalen";});window.speechSynthesis.speak(u2);},800);});window.speechSynthesis.speak(u1);}\nfunction nxt(){if(i<W.length-1){i++;ui();}}\nfunction prev(){if(i>0){i--;ui();}}\nfunction fin(){window.speechSynthesis.cancel();document.getElementById("pc").style.display="none";document.getElementById("done").style.display="block";}\nfunction restart(){i=0;document.getElementById("done").style.display="none";document.getElementById("pc").style.display="block";ui();}\nwindow.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices();};\n<\/script>\n</body></html>';
-}
-
-function renderStudentList() {
-  var el = document.getElementById('student-list');
-  var sr = document.getElementById('start-row');
-  selectedId = null;
-  if (!dictees.length) {
-    el.innerHTML = '<div class="empty-state"><span class="emoji">&#128564;</span>Er zijn nog geen dictees beschikbaar.<br>Vraag je leerkracht om een dictee te maken!</div>';
-    sr.classList.add('hidden');
-    return;
-  }
-  var html = '<div class="dictee-selector">';
-  dictees.forEach(function(d) {
-    html += '<div class="dictee-option" id="opt-' + d.id + '" onclick="selectDictee(\'' + d.id + '\')">' +
-      '<div class="dopt-title">' + escHtml(d.title) + '</div>' +
-      '<div class="dopt-meta">' + d.words.length + ' woorden</div>' +
-    '</div>';
-  });
-  html += '</div>';
-  el.innerHTML = html;
-  sr.classList.add('hidden');
-}
-
-function selectDictee(id) {
-  selectedId = id;
-  document.querySelectorAll('.dictee-option').forEach(function(e){ e.classList.remove('selected'); });
-  document.getElementById('opt-' + id).classList.add('selected');
-  var startRow = document.getElementById('start-row');
-  startRow.classList.remove('hidden');
-  setTimeout(function() {
-    startRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 100);
-}
-
-function startDictee() {
-  // Sync player speed with selector speed
-  var selectorSpeed = parseFloat(document.getElementById('student-speed').value || 1.0);
-  var playerSpeedEl = document.getElementById('player-speed');
-  if (playerSpeedEl) {
-    playerSpeedEl.value = selectorSpeed;
-    updatePlayerSpeed();
-  }
-  currentDictee = dictees.find(function(d){ return d.id === selectedId; });
-  if (!currentDictee) return;
-  currentIndex = 0;
-  document.getElementById('selector-card').style.display = 'none';
-  document.getElementById('done-card').style.display = 'none';
-  document.getElementById('player').style.display = 'block';
-  updatePlayer();
-}
-
-function updatePlayer() {
-  var total = currentDictee.words.length;
-  var n = currentIndex + 1;
-  document.getElementById('prog-label').textContent = 'Woord ' + n + ' van ' + total;
-  document.getElementById('prog-fill').style.width = ((currentIndex / total) * 100) + '%';
-  var bn = document.getElementById('big-num');
-  bn.textContent = n; bn.classList.remove('pop'); void bn.offsetWidth; bn.classList.add('pop');
-  document.getElementById('nav-prev').style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
-  var last = currentIndex === total - 1;
-  document.getElementById('nav-next').classList.toggle('hidden', last);
-  document.getElementById('nav-done').classList.toggle('hidden', !last);
-  var sb = document.getElementById('speak-btn');
-  sb.classList.remove('speaking'); sb.textContent = '🔊';
-  document.getElementById('speak-lbl').textContent = 'Klik om het woord te horen';
-}
-
-function updateStudentSpeed() {
-  var v = parseFloat(document.getElementById('student-speed').value);
-  var map = [[0.4,'Heel langzaam'],[0.5,'Langzaam'],[0.6,'Duidelijk'],[0.75,'Normaal'],[0.875,'Vlot'],[1.0,'Snel']];
-  var label = map.reduce(function(a,b){ return Math.abs(b[0]-v) < Math.abs(a[0]-v) ? b : a; })[1];
-  document.getElementById('student-speed-val').textContent = label;
-}
-
-function getStudentSpeed() {
-  // Gebruik de player-snelheid als die zichtbaar is, anders de keuze-snelheid
-  var playerEl = document.getElementById('player-speed');
-  var selectorEl = document.getElementById('student-speed');
-  if (playerEl && document.getElementById('player').style.display !== 'none') {
-    return parseFloat(playerEl.value);
-  }
-  return selectorEl ? parseFloat(selectorEl.value) : 1.0;
-}
-
-function updatePlayerSpeed() {
-  var v = parseFloat(document.getElementById('player-speed').value);
-  var map = [[0.4,'Heel langzaam'],[0.5,'Langzaam'],[0.6,'Duidelijk'],[0.75,'Gewoon'],[0.875,'Vlot'],[1.0,'Snel']];
-  var label = map.reduce(function(a,b){ return Math.abs(b[0]-v) < Math.abs(a[0]-v) ? b : a; })[1];
-  document.getElementById('player-speed-val').textContent = label;
-}
-
-function getBestDutchVoice() {
-  var voices = window.speechSynthesis.getVoices();
-  // Prefer high-quality online Dutch voices (clearest articulation)
-  var preferred = ['Microsoft Mila', 'Google Nederlands', 'nl-NL-Standard', 'Xander', 'Fiona'];
-  for (var p = 0; p < preferred.length; p++) {
-    var match = voices.find(function(v) { return v.name.indexOf(preferred[p]) !== -1; });
-    if (match) return match;
-  }
-  // Fall back to any Dutch voice
-  return voices.find(function(v) { return v.lang === 'nl-NL'; }) ||
-         voices.find(function(v) { return v.lang.startsWith('nl'); }) ||
-         null;
-}
-
-function speakWord() {
-  if (!currentDictee) return;
-  window.speechSynthesis.cancel();
-  var word = currentDictee.words[currentIndex];
-  var rate = getStudentSpeed();
-  var voice = getBestDutchVoice();
-  var sb = document.getElementById('speak-btn');
-  sb.classList.add('speaking'); sb.textContent = '🔈';
-  document.getElementById('speak-lbl').textContent = 'Bezig met voorlezen...';
-
-  function makeUtterance(text, onDone) {
-    var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'nl-NL';
-    u.rate = rate;
-    u.pitch = 1.0;
-    u.volume = 1.0;
-    if (voice) u.voice = voice;
-    u.onend = onDone;
-    return u;
-  }
-
-  // Speak word once, pause, then speak again for clarity
-  var u1 = makeUtterance(word, function() {
-    setTimeout(function() {
-      var u2 = makeUtterance(word, function() {
-        sb.classList.remove('speaking'); sb.textContent = '🔊';
-        document.getElementById('speak-lbl').textContent = 'Klik opnieuw om te herhalen';
-      });
-      window.speechSynthesis.speak(u2);
-    }, 800);
-  });
-  window.speechSynthesis.speak(u1);
-}
-
-function nextWord() { if (currentIndex < currentDictee.words.length - 1) { currentIndex++; updatePlayer(); } }
-function prevWord() { if (currentIndex > 0) { currentIndex--; updatePlayer(); } }
-
-function finishDictee() {
-  window.speechSynthesis.cancel();
-  document.getElementById('player').style.display = 'none';
-  document.getElementById('done-card').style.display = 'block';
-  document.getElementById('done-sub').textContent = 'Alle ' + currentDictee.words.length + ' woorden van "' + currentDictee.title + '" zijn voorgelezen!';
-}
-
-function restartDictee() {
-  currentIndex = 0;
-  document.getElementById('done-card').style.display = 'none';
-  document.getElementById('player').style.display = 'block';
-  updatePlayer();
-}
-
-function backToSelector() {
-  window.speechSynthesis.cancel();
-  currentDictee = null;
-  document.getElementById('player').style.display = 'none';
-  document.getElementById('done-card').style.display = 'none';
-  document.getElementById('selector-card').style.display = 'block';
-  renderStudentList();
-}
-
-window.speechSynthesis.onvoiceschanged = function(){ window.speechSynthesis.getVoices(); };
-dictees = loadAll(); sortDictees();
-renderSavedList();
-updateSpeedLabel();
-initJsonBin();
-// Start in leerlinggedeelte
-document.getElementById('teacher-panel').style.display = 'none';
-document.getElementById('student-panel').style.display = 'block';
-renderStudentList();
-</script>
+        
+        // App start
+        window.addEventListener('DOMContentLoaded', function() {
+            if (sessionStorage.getItem('authenticated') === 'true') {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                initStudents();
+                loadFromFirebase();
+            }
+        });
+        
+        const MAX_STUDENTS = 100;
+        
+        const themes = [
+            {
+                name: 'Thema 1: Hallo',
+                lessons: [
+                    { number: '1.1', title: 'Hallo' },
+                    { number: '1.2', title: 'Hoi, hallo, doei, tot ziens' },
+                    { number: '1.3', title: 'Maan – man' },
+                    { number: '1.4', title: 'Familie (1)' },
+                    { number: '1.5', title: 'A, b, c' },
+                    { number: '1.6', title: 'Ik, jij, wij' },
+                    { number: '1.7', title: 'Fiets, boek, trein' },
+                    { number: '1.8', title: 'Hoe gaat het?' },
+                    { number: '1.9', title: 'Letter, woord, zin' },
+                    { number: '1.10', title: 'Familie (2)' },
+                    { number: '1.11', title: 'Huis, neus, touw' },
+                    { number: '1.12', title: 'Ik ben, jij bent, hij is...' },
+                    { number: '1.13', title: 'Waar kom je vandaan?' },
+                    { number: '1.14', title: 'Wie? Wat? Waar?' },
+                    { number: '1.15', title: 'Ik heb, jij hebt...' },
+                    { number: '—', title: 'Herhalingsopdrachten thema 1' }
+                ]
+            },
+            {
+                name: 'Thema 2: School',
+                lessons: [
+                    { number: '2.1', title: 'Naar school' },
+                    { number: '2.2', title: 'Eén, twee, drie' },
+                    { number: '2.3', title: 'De cursisten leren Nederlands.' },
+                    { number: '2.4', title: 'De dagen van de week' },
+                    { number: '2.5', title: 'Hoeveel? Wanneer?' },
+                    { number: '2.6', title: 'Twintig, dertig, veertig' },
+                    { number: '2.7', title: 'Wat zegt u?' },
+                    { number: '2.8', title: 'In de klas' },
+                    { number: '2.9', title: 'Een opdracht maken' },
+                    { number: '2.10', title: 'De maanden van het jaar' },
+                    { number: '2.11', title: 'In de pauze' },
+                    { number: '2.12', title: 'Woorden met ch of sch' },
+                    { number: '2.13', title: 'Ik drink, hij drinkt...' },
+                    { number: '2.14', title: 'Begrijp je het?' },
+                    { number: '2.15', title: 'Alsjeblieft, dank je wel' },
+                    { number: '—', title: 'Herhalingsopdrachten thema 2' }
+                ]
+            },
+            {
+                name: 'Thema 3: Wonen',
+                lessons: [
+                    { number: '3.1', title: 'Het huis' },
+                    { number: '3.2', title: 'Ik zeg, wij zeggen...' },
+                    { number: '3.3', title: 'De kamers' },
+                    { number: '3.4', title: 'Ik wil me graag voorstellen' },
+                    { number: '3.5', title: 'De meubels' },
+                    { number: '3.6', title: 'Ik woon... – ik spreek...' },
+                    { number: '3.7', title: 'De kleuren' },
+                    { number: '3.8', title: 'De buurt' },
+                    { number: '3.9', title: 'Eerste, tweede, derde' },
+                    { number: '3.10', title: 'Te huur' },
+                    { number: '3.11', title: 'Ik schrijf... – ik kies...' },
+                    { number: '3.12', title: 'Kazem is de sleutel vergeten' },
+                    { number: '3.13', title: 'Zinnen maken (1)' },
+                    { number: '—', title: 'Herhalingsopdrachten thema 3' }
+                ]
+            },
+            {
+                name: 'Thema 4: Eten en drinken',
+                lessons: [
+                    { number: '4.1', title: 'Boodschappen doen' },
+                    { number: '4.2', title: 'Ik kom... – ik ga...' },
+                    { number: '4.3', title: 'Ontbijt, lunch en avondeten' },
+                    { number: '4.4', title: 'Soep koken' },
+                    { number: '4.5', title: 'Aan tafel!' },
+                    { number: '4.6', title: 'Woorden met -ig' },
+                    { number: '4.7', title: 'Wat vind je lekker?' },
+                    { number: '4.8', title: 'Vragen maken (1)' },
+                    { number: '4.9', title: 'Appeltaart maken' },
+                    { number: '4.10', title: 'De euro' },
+                    { number: '4.11', title: 'Vragen maken (2)' },
+                    { number: '4.12', title: 'Op de markt' },
+                    { number: '4.13', title: 'Van € 1,50 voor € 0,99!' },
+                    { number: '4.14', title: 'Su-per-markt' },
+                    { number: '4.15', title: 'In de supermarkt' },
+                    { number: '—', title: 'Herhalingsopdrachten thema 4' }
+                ]
+            },
+            {
+                name: 'Thema 5: De dokter',
+                lessons: [
+                    { number: '5.1', title: 'Hoofd, schouders, knie en teen' },
+                    { number: '5.2', title: 'Schou-der' },
+                    { number: '5.3', title: 'Oren, ogen en neus' },
+                    { number: '5.4', title: 'Voet – voeten, lip – lippen' },
+                    { number: '5.5', title: 'Een afspraak maken' },
+                    { number: '5.6', title: 'Been – benen, huis – huizen' },
+                    { number: '5.7', title: 'Naar de dokter' },
+                    { number: '5.8', title: 'Jij of u?' },
+                    { number: '5.9', title: 'Wat zijn uw klachten?' },
+                    { number: '5.10', title: 'Dokter – dokters' },
+                    { number: '5.11', title: 'Woorden met oor, eer of eur' },
+                    { number: '5.12', title: 'Naar de apotheek' },
+                    { number: '5.13', title: 'Waarom?' },
+                    { number: '5.14', title: 'Bij de tandarts' },
+                    { number: '—', title: 'Herhalingsopdrachten thema 5' }
+                ]
+            },
+            {
+                name: 'Thema 6: De kleren',
+                lessons: [
+                    { number: '6.1', title: 'De jas, de broek, de schoenen' },
+                    { number: '6.2', title: 'De en het' },
+                    { number: '6.3', title: 'Kleding kopen' },
+                    { number: '6.4', title: 'Woorden met ooi, aai of oei' },
+                    { number: '6.5', title: 'Wat draagt zij?' },
+                    { number: '6.6', title: 'Welk? Welke?' },
+                    { number: '6.7', title: 'Welke sieraden draagt zij?' },
+                    { number: '6.8', title: 'De rok is kapot' },
+                    { number: '6.9', title: 'Ik wil, jij wil...' },
+                    { number: '6.10', title: 'De tijd' },
+                    { number: '6.11', title: 'Is de winkel open?' },
+                    { number: '6.12', title: 'Hoe laat is het? (1)' },
+                    { number: '6.13', title: 'Duizend, miljoen, miljard' },
+                    { number: '6.14', title: 'Kleren wassen' },
+                    { number: '6.15', title: 'Hoe laat is het? (2)' },
+                    { number: '—', title: 'Herhalingsopdrachten thema 6' }
+                ]
+            },
+            {
+                name: 'Thema 7: Reizen',
+                lessons: [
+                    { number: '7.1', title: 'Ik ga op reis' },
+                    { number: '7.2', title: 'Hoe?' },
+                    { number: '7.3', title: 'Regels in het verkeer' },
+                    { number: '7.4', title: 'Ik kan… – ik mag…' },
+                    { number: '7.5', title: 'De kaart van Nederland' },
+                    { number: '7.6', title: 'Op de doos, achter de doos…' },
+                    { number: '7.7', title: 'In de file' },
+                    { number: '7.8', title: 'Waar is het station?' },
+                    { number: '7.9', title: 'Woorden opzoeken' },
+                    { number: '7.10', title: 'Voor het eten, op donderdag…' },
+                    { number: '7.11', title: 'Op het station' },
+                    { number: '7.12', title: 'Mijn auto, jouw auto…' },
+                    { number: '7.13', title: 'Met de bus' },
+                    { number: '—', title: 'Herhalingsopdrachten thema 7' }
+                ]
+            },
+            {
+                name: 'Thema 8: Vrije tijd',
+                lessons: [
+                    { number: '8.1', title: 'De boerderij' },
+                    { number: '8.2', title: 'Woorden leren' },
+                    { number: '8.3', title: 'Voetbalclub Groen Gras' },
+                    { number: '8.4', title: 'Zinnen maken (2)' },
+                    { number: '8.5', title: 'Wat is je hobby?' },
+                    { number: '8.6', title: 'Een formulier invullen' },
+                    { number: '8.7', title: 'De broek… – het paard…' },
+                    { number: '8.8', title: 'Wat doe jij in het weekend?' },
+                    { number: '8.9', title: 'Geen of niet' },
+                    { number: '8.10', title: 'Op vakantie' },
+                    { number: '8.11', title: 'Ik begrijp het niet' },
+                    { number: '8.12', title: 'Dit boek is hier. Dat boek…' },
+                    { number: '8.13', title: 'Vrienden' },
+                    { number: '—', title: 'Herhalingsopdrachten thema 8' }
+                ]
+            }
+        ];
+        
+        let currentStudent = '';
+        
+        function formatDate(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+        
+        function getTodayDate() {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+        
+        function getStudentsList() {
+            const stored = localStorage.getItem('studentsList');
+            return stored ? JSON.parse(stored) : [];
+        }
+        
+        function saveStudentsList(students) {
+            localStorage.setItem('studentsList', JSON.stringify(students));
+        }
+        
+        function addStudent() {
+            const input = document.getElementById('newStudentName');
+            const name = input.value.trim();
+            
+            if (!name) {
+                alert('Vul een naam in voor de nieuwe leerling!');
+                return;
+            }
+            
+            const students = getStudentsList();
+            
+            if (students.length >= MAX_STUDENTS) {
+                alert(`Je kunt maximaal ${MAX_STUDENTS} leerlingen toevoegen!`);
+                return;
+            }
+            
+            if (students.includes(name)) {
+                alert('Deze leerling bestaat al!');
+                return;
+            }
+            
+            students.push(name);
+            students.sort();
+            saveStudentsList(students);
+            
+            input.value = '';
+            updateStudentSelector();
+            
+            // Selecteer de nieuwe leerling automatisch
+            document.getElementById('studentSelect').value = name;
+            currentStudent = name;
+            renderStudentProgress();
+            
+            alert(`Leerling "${name}" succesvol toegevoegd!`);
+        }
+        
+        function renameStudent() {
+            if (!currentStudent) {
+                alert('Selecteer eerst een leerling!');
+                return;
+            }
+            
+            const newName = prompt(`Nieuwe naam voor "${currentStudent}":`, currentStudent);
+            
+            if (!newName || newName.trim() === '') {
+                return;
+            }
+            
+            const trimmedName = newName.trim();
+            
+            if (trimmedName === currentStudent) {
+                return; // Geen wijziging
+            }
+            
+            const students = getStudentsList();
+            
+            if (students.includes(trimmedName)) {
+                alert('Een leerling met deze naam bestaat al!');
+                return;
+            }
+            
+            const oldName = currentStudent;
+            
+            // Haal data van oude naam op
+            const data = getStudentData(currentStudent);
+            
+            // Verwijder oude naam
+            const index = students.indexOf(currentStudent);
+            if (index > -1) {
+                students.splice(index, 1);
+            }
+            localStorage.removeItem(`student_${currentStudent}`);
+            
+            // Voeg nieuwe naam toe
+            students.push(trimmedName);
+            students.sort();
+            saveStudentsList(students);
+            saveStudentData(trimmedName, data);
+            
+            // Update in Firebase
+            renameStudentInFirebase(oldName, trimmedName);
+            
+            // Update selectie
+            currentStudent = trimmedName;
+            updateStudentSelector();
+            document.getElementById('studentSelect').value = trimmedName;
+            renderStudentProgress();
+            
+            alert(`Naam gewijzigd naar "${trimmedName}"!`);
+        }
+        
+        function deleteStudent() {
+            if (!currentStudent) {
+                alert('Selecteer eerst een leerling om te verwijderen!');
+                return;
+            }
+            
+            if (confirm(`Weet je zeker dat je "${currentStudent}" wilt verwijderen?\n\nDit verwijdert ook alle voortgang van deze leerling!`)) {
+                const students = getStudentsList();
+                const index = students.indexOf(currentStudent);
+                
+                if (index > -1) {
+                    students.splice(index, 1);
+                    saveStudentsList(students);
+                }
+                
+                // Verwijder ook de data van deze leerling
+                localStorage.removeItem(`student_${currentStudent}`);
+                
+                // Verwijder uit Firebase
+                deleteStudentFromFirebase(currentStudent);
+                
+                currentStudent = '';
+                updateStudentSelector();
+                showWelcomeMessage();
+                
+                alert('Leerling succesvol verwijderd!');
+            }
+        }
+        
+        function updateStudentSelector() {
+            const select = document.getElementById('studentSelect');
+            const students = getStudentsList();
+            const currentValue = select.value;
+            
+            // Bewaar huidige selectie
+            select.innerHTML = '<option value="">-- Kies een leerling --</option>';
+            
+            students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student;
+                option.textContent = student;
+                select.appendChild(option);
+            });
+            
+            // Herstel selectie als deze nog bestaat
+            if (students.includes(currentValue)) {
+                select.value = currentValue;
+            }
+            
+            // Update student count display
+            updateStudentCount();
+        }
+        
+        function updateStudentCount() {
+            const students = getStudentsList();
+            const count = students.length;
+            const remaining = MAX_STUDENTS - count;
+            
+            // Je kunt hier eventueel een teller tonen
+            console.log(`${count} leerlingen, ${remaining} plekken beschikbaar`);
+        }
+        
+        function initStudents() {
+            const select = document.getElementById('studentSelect');
+            
+            // Laad bestaande leerlingen
+            updateStudentSelector();
+            
+            select.addEventListener('change', function() {
+                currentStudent = this.value;
+                if (currentStudent) {
+                    renderStudentProgress();
+                } else {
+                    showWelcomeMessage();
+                }
+            });
+            
+            // Enter key support voor nieuwe leerling toevoegen
+            document.getElementById('newStudentName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addStudent();
+                }
+            });
+        }
+        
+        function showWelcomeMessage() {
+            const students = getStudentsList();
+            const count = students.length;
+            const remaining = MAX_STUDENTS - count;
+            
+            document.getElementById('content').innerHTML = `
+                <div class="student-info">
+                    <h2>👋 Welkom bij de Aftekenlijst!</h2>
+                    <p style="margin-bottom: 15px;">Begin met het toevoegen van je leerlingen om hun voortgang bij te houden.</p>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <h3 style="color: #667eea; margin-bottom: 10px;">📊 Statistieken</h3>
+                        <p style="margin: 5px 0;"><strong>Huidige leerlingen:</strong> ${count} van ${MAX_STUDENTS}</p>
+                        <p style="margin: 5px 0;"><strong>Beschikbare plekken:</strong> ${remaining}</p>
+                    </div>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <h3 style="color: #667eea; margin-bottom: 10px;">💡 Hoe te gebruiken</h3>
+                        <ol style="margin-left: 20px; line-height: 1.8;">
+                            <li>Voeg leerlingen toe met de "Voeg Leerling Toe" knop</li>
+                            <li>Selecteer een leerling uit het dropdown menu</li>
+                            <li>Vink af welke lessen zijn afgerond (boek en/of online)</li>
+                            <li>Je voortgang wordt automatisch opgeslagen</li>
+                        </ol>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getStudentData(student) {
+            const key = `student_${student}`;
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : {};
+        }
+        
+        function getLastCompletedLesson(studentData) {
+            let lastCompleted = null;
+            let lastTimestamp = 0;
+            
+            themes.forEach((theme, themeIdx) => {
+                theme.lessons.forEach((lesson, lessonIdx) => {
+                    if (studentData[themeIdx]?.[lessonIdx]?.book && 
+                        studentData[themeIdx]?.[lessonIdx]?.online) {
+                        const timestamp = studentData[themeIdx][lessonIdx].timestamp || 0;
+                        if (timestamp > lastTimestamp) {
+                            lastTimestamp = timestamp;
+                            lastCompleted = { themeIdx, lessonIdx };
+                        }
+                    }
+                });
+            });
+            
+            return lastCompleted;
+        }
+        
+        function saveStudentData(student, data) {
+            const key = `student_${student}`;
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+        
+        function updateCheckbox(themeIndex, lessonIndex, type) {
+            const checkboxId = `${currentStudent}_${themeIndex}_${lessonIndex}_${type}`;
+            const checkbox = document.getElementById(checkboxId);
+            const data = getStudentData(currentStudent);
+            
+            if (!data[themeIndex]) data[themeIndex] = {};
+            if (!data[themeIndex][lessonIndex]) data[themeIndex][lessonIndex] = {};
+            
+            data[themeIndex][lessonIndex][type] = checkbox.checked;
+            
+            // Als beide (boek EN laptop) zijn afgevinkt, sla timestamp en datum op
+            if (data[themeIndex][lessonIndex].book && data[themeIndex][lessonIndex].online) {
+                if (!data[themeIndex][lessonIndex].timestamp) {
+                    // Eerste keer afgerond - sla huidige datum op
+                    data[themeIndex][lessonIndex].timestamp = Date.now();
+                    data[themeIndex][lessonIndex].completedDate = getTodayDate();
+                }
+            } else {
+                // Als een van beide wordt uitgevinkt, verwijder de timestamp en datum
+                delete data[themeIndex][lessonIndex].timestamp;
+                delete data[themeIndex][lessonIndex].completedDate;
+            }
+            
+            saveStudentData(currentStudent, data);
+            
+            // Sla ook op naar Firebase
+            saveToFirebase(currentStudent, themeIndex, lessonIndex, data[themeIndex][lessonIndex]);
+            
+            // Herlaad de weergave om de sorteerorde bij te werken
+            renderStudentProgress();
+            updateProgressSummary();
+        }
+        
+        function calculateProgress() {
+            const data = getStudentData(currentStudent);
+            let totalLessons = 0;
+            let bookCompleted = 0;
+            let onlineCompleted = 0;
+            
+            themes.forEach((theme, themeIdx) => {
+                theme.lessons.forEach((lesson, lessonIdx) => {
+                    totalLessons++;
+                    if (data[themeIdx] && data[themeIdx][lessonIdx]) {
+                        if (data[themeIdx][lessonIdx].book) bookCompleted++;
+                        if (data[themeIdx][lessonIdx].online) onlineCompleted++;
+                    }
+                });
+            });
+            
+            return {
+                totalLessons,
+                bookCompleted,
+                onlineCompleted,
+                bookPercentage: Math.round((bookCompleted / totalLessons) * 100),
+                onlinePercentage: Math.round((onlineCompleted / totalLessons) * 100),
+                totalPercentage: Math.round(((bookCompleted + onlineCompleted) / (totalLessons * 2)) * 100)
+            };
+        }
+        
+        function updateProgressSummary() {
+            const progress = calculateProgress();
+            const summaryDiv = document.querySelector('.progress-summary');
+            if (summaryDiv) {
+                summaryDiv.innerHTML = `
+                    <div class="progress-card">
+                        <h4>📖 Boek Afgerond</h4>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress.bookPercentage}%">
+                                ${progress.bookPercentage}%
+                            </div>
+                        </div>
+                        <p style="margin-top: 8px; color: #6c757d; font-size: 0.9em;">
+                            ${progress.bookCompleted} van ${progress.totalLessons} lessen
+                        </p>
+                    </div>
+                    <div class="progress-card">
+                        <h4>💻 Laptop Afgerond</h4>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress.onlinePercentage}%">
+                                ${progress.onlinePercentage}%
+                            </div>
+                        </div>
+                        <p style="margin-top: 8px; color: #6c757d; font-size: 0.9em;">
+                            ${progress.onlineCompleted} van ${progress.totalLessons} lessen
+                        </p>
+                    </div>
+                    <div class="progress-card">
+                        <h4>✅ Totale Voortgang</h4>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress.totalPercentage}%">
+                                ${progress.totalPercentage}%
+                            </div>
+                        </div>
+                        <p style="margin-top: 8px; color: #6c757d; font-size: 0.9em;">
+                            ${progress.bookCompleted + progress.onlineCompleted} van ${progress.totalLessons * 2} items
+                        </p>
+                    </div>
+                `;
+            }
+        }
+        
+        function toggleTheme(themeIndex) {
+            const content = document.getElementById(`theme-content-${themeIndex}`);
+            const header = document.getElementById(`theme-header-${themeIndex}`);
+            const icon = header.querySelector('.toggle-icon');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                icon.textContent = '▶';
+            }
+        }
+        
+        function renderStudentProgress() {
+            const data = getStudentData(currentStudent);
+            const progress = calculateProgress();
+            const todayDate = getTodayDate();
+            
+            let activeThemesHtml = '';
+            let completedThemesHtml = '';
+            const completedThemes = [];
+            const activeThemes = [];
+            
+            // Verdeel thema's in actief en afgerond
+            themes.forEach((theme, themeIdx) => {
+                // Bereken voortgang voor dit thema
+                const themeLessons = theme.lessons.length;
+                let themeBookCompleted = 0;
+                let themeOnlineCompleted = 0;
+                let latestCompletionDate = null;
+                
+                theme.lessons.forEach((lesson, lessonIdx) => {
+                    if (data[themeIdx]?.[lessonIdx]?.book) themeBookCompleted++;
+                    if (data[themeIdx]?.[lessonIdx]?.online) themeOnlineCompleted++;
+                    
+                    // Vind de laatst afgeronde les voor de datum
+                    if (data[themeIdx]?.[lessonIdx]?.book && 
+                        data[themeIdx]?.[lessonIdx]?.online && 
+                        data[themeIdx]?.[lessonIdx]?.completedDate) {
+                        if (!latestCompletionDate) {
+                            latestCompletionDate = data[themeIdx][lessonIdx].completedDate;
+                        }
+                    }
+                });
+                
+                const isThemeCompleted = (themeBookCompleted === themeLessons && themeOnlineCompleted === themeLessons);
+                
+                if (isThemeCompleted) {
+                    completedThemes.push({
+                        theme,
+                        themeIdx,
+                        themeLessons,
+                        completedDate: latestCompletionDate
+                    });
+                } else {
+                    activeThemes.push({
+                        theme,
+                        themeIdx,
+                        themeLessons,
+                        themeBookCompleted,
+                        themeOnlineCompleted
+                    });
+                }
+            });
+            
+            // Render actieve thema's
+            let firstIncompleteThemeIdx = null;
+            
+            // Vind het eerste thema met incomplete lessen
+            for (let i = 0; i < activeThemes.length; i++) {
+                const { themeIdx } = activeThemes[i];
+                const hasIncompleteLessons = themes[themeIdx].lessons.some((lesson, lessonIdx) => {
+                    return !(data[themeIdx]?.[lessonIdx]?.book && data[themeIdx]?.[lessonIdx]?.online);
+                });
+                
+                if (hasIncompleteLessons) {
+                    firstIncompleteThemeIdx = themeIdx;
+                    break;
+                }
+            }
+            
+            activeThemes.forEach(({ theme, themeIdx, themeLessons, themeBookCompleted, themeOnlineCompleted }) => {
+                const themeBookPercentage = Math.round((themeBookCompleted / themeLessons) * 100);
+                const themeOnlinePercentage = Math.round((themeOnlineCompleted / themeLessons) * 100);
+                const themeTotalPercentage = Math.round(((themeBookCompleted + themeOnlineCompleted) / (themeLessons * 2)) * 100);
+                
+                // Verdeel lessen in afgerond en niet-afgerond
+                const completedLessons = [];
+                const incompleteLessons = [];
+                let currentLesson = null;
+                
+                theme.lessons.forEach((lesson, lessonIdx) => {
+                    const lessonData = {
+                        lesson,
+                        lessonIdx,
+                        bookChecked: data[themeIdx]?.[lessonIdx]?.book ? 'checked' : '',
+                        onlineChecked: data[themeIdx]?.[lessonIdx]?.online ? 'checked' : '',
+                        timestamp: data[themeIdx]?.[lessonIdx]?.timestamp || 0,
+                        completedDate: data[themeIdx]?.[lessonIdx]?.completedDate || ''
+                    };
+                    
+                    if (data[themeIdx]?.[lessonIdx]?.book && data[themeIdx]?.[lessonIdx]?.online) {
+                        completedLessons.push(lessonData);
+                    } else {
+                        incompleteLessons.push(lessonData);
+                        if (currentLesson === null) {
+                            currentLesson = lessonData;
+                        }
+                    }
+                });
+                
+                completedLessons.sort((a, b) => b.timestamp - a.timestamp);
+                
+                // Bepaal of dit thema het huidige thema is (alleen het EERSTE thema met incomplete lessen)
+                const isCurrentTheme = (themeIdx === firstIncompleteThemeIdx);
+                const contentDisplay = isCurrentTheme ? 'block' : 'none';
+                const toggleIcon = isCurrentTheme ? '▼' : '▶';
+                
+                activeThemesHtml += `
+                    <div class="theme-container">
+                        <div class="theme-section">
+                            <div class="theme-header" id="theme-header-${themeIdx}" onclick="toggleTheme(${themeIdx})">
+                                <div style="flex: 1;">
+                                    <div>${theme.name}</div>
+                                    <div style="font-size: 0.85em; opacity: 0.9; margin-top: 5px; display: flex; gap: 15px; align-items: center;">
+                                        <span>📖 ${themeBookCompleted}/${themeLessons} (${themeBookPercentage}%)</span>
+                                        <span>💻 ${themeOnlineCompleted}/${themeLessons} (${themeOnlinePercentage}%)</span>
+                                        <span style="font-weight: 700;">Totaal: ${themeTotalPercentage}%</span>
+                                    </div>
+                                </div>
+                                <span class="toggle-icon">${toggleIcon}</span>
+                            </div>
+                            <div class="theme-content" id="theme-content-${themeIdx}" style="display: ${contentDisplay};">
+                                <table class="lessons-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 100px;">Les</th>
+                                            <th>Titel</th>
+                                            <th style="width: 120px; text-align: center;">📖 Boek</th>
+                                            <th style="width: 120px; text-align: center;">💻 Laptop</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                `;
+                
+                if (currentLesson) {
+                    activeThemesHtml += `
+                        <tr class="current-lesson-highlight" id="lesson-${themeIdx}-${currentLesson.lessonIdx}">
+                            <td class="lesson-number">${currentLesson.lesson.number}</td>
+                            <td class="lesson-title">
+                                ${currentLesson.lesson.title}
+                                <span class="current-lesson-badge">👉 NU</span>
+                                <span class="lesson-date">📅 ${todayDate}</span>
+                            </td>
+                            <td class="checkbox-cell">
+                                <input type="checkbox" 
+                                       class="custom-checkbox" 
+                                       id="${currentStudent}_${themeIdx}_${currentLesson.lessonIdx}_book"
+                                       onchange="updateCheckbox(${themeIdx}, ${currentLesson.lessonIdx}, 'book')"
+                                       ${currentLesson.bookChecked}>
+                            </td>
+                            <td class="checkbox-cell">
+                                <input type="checkbox" 
+                                       class="custom-checkbox" 
+                                       id="${currentStudent}_${themeIdx}_${currentLesson.lessonIdx}_online"
+                                       onchange="updateCheckbox(${themeIdx}, ${currentLesson.lessonIdx}, 'online')"
+                                       ${currentLesson.onlineChecked}>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    if (incompleteLessons.length > 1) {
+                        activeThemesHtml += `
+                            <tr style="background: #f8f9fa; height: 3px;">
+                                <td colspan="4" style="padding: 0;"></td>
+                            </tr>
+                        `;
+                    }
+                }
+                
+                incompleteLessons.forEach((lessonData, index) => {
+                    if (index === 0) return;
+                    
+                    activeThemesHtml += `
+                        <tr id="lesson-${themeIdx}-${lessonData.lessonIdx}">
+                            <td class="lesson-number">${lessonData.lesson.number}</td>
+                            <td class="lesson-title">
+                                ${lessonData.lesson.title}
+                                <span class="lesson-date">📅 ${todayDate}</span>
+                            </td>
+                            <td class="checkbox-cell">
+                                <input type="checkbox" 
+                                       class="custom-checkbox" 
+                                       id="${currentStudent}_${themeIdx}_${lessonData.lessonIdx}_book"
+                                       onchange="updateCheckbox(${themeIdx}, ${lessonData.lessonIdx}, 'book')"
+                                       ${lessonData.bookChecked}>
+                            </td>
+                            <td class="checkbox-cell">
+                                <input type="checkbox" 
+                                       class="custom-checkbox" 
+                                       id="${currentStudent}_${themeIdx}_${lessonData.lessonIdx}_online"
+                                       onchange="updateCheckbox(${themeIdx}, ${lessonData.lessonIdx}, 'online')"
+                                       ${lessonData.onlineChecked}>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                activeThemesHtml += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                `;
+                
+                if (completedLessons.length > 0) {
+                    activeThemesHtml += `
+                        <div class="completed-section">
+                            <h3 style="color: #28a745; margin-bottom: 15px; font-size: 1.1em;">✅ Afgerond (${completedLessons.length})</h3>
+                            <table class="lessons-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 100px;">Les</th>
+                                        <th>Titel</th>
+                                        <th style="width: 120px; text-align: center;">📖 Boek</th>
+                                        <th style="width: 120px; text-align: center;">💻 Laptop</th>
+                                        <th style="width: 150px; text-align: center;">Datum</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    completedLessons.forEach((lessonData, index) => {
+                        const isLatest = index === 0;
+                        const rowClass = isLatest ? 'completed-lesson latest' : 'completed-lesson';
+                        const badge = isLatest ? '<span class="completed-item-badge">LAATST</span>' : '';
+                        const displayDate = lessonData.completedDate || formatDate(lessonData.timestamp);
+                        
+                        activeThemesHtml += `
+                            <tr class="${rowClass}">
+                                <td class="lesson-number">${lessonData.lesson.number}</td>
+                                <td class="lesson-title">
+                                    ${lessonData.lesson.title}
+                                    ${badge}
+                                </td>
+                                <td class="checkbox-cell">
+                                    <input type="checkbox" 
+                                           class="custom-checkbox" 
+                                           id="${currentStudent}_${themeIdx}_${lessonData.lessonIdx}_book"
+                                           onchange="updateCheckbox(${themeIdx}, ${lessonData.lessonIdx}, 'book')"
+                                           ${lessonData.bookChecked}>
+                                </td>
+                                <td class="checkbox-cell">
+                                    <input type="checkbox" 
+                                           class="custom-checkbox" 
+                                           id="${currentStudent}_${themeIdx}_${lessonData.lessonIdx}_online"
+                                           onchange="updateCheckbox(${themeIdx}, ${lessonData.lessonIdx}, 'online')"
+                                           ${lessonData.onlineChecked}>
+                                </td>
+                                <td style="text-align: center; font-size: 0.9em; color: #28a745;">
+                                    📅 ${displayDate}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    activeThemesHtml += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+                
+                activeThemesHtml += `
+                    </div>
+                `;
+            });
+            
+            // Render afgeronde thema's voor de sidebar
+            if (completedThemes.length > 0) {
+                completedThemes.forEach(({ theme, themeIdx, themeLessons, completedDate }) => {
+                    completedThemesHtml += `
+                        <div class="completed-theme-item" onclick="toggleTheme(${themeIdx})">
+                            <div class="completed-theme-name">✅ ${theme.name}</div>
+                            <div class="completed-theme-stats">
+                                <span>100% • ${themeLessons} lessen</span>
+                            </div>
+                            ${completedDate ? `<div class="completed-theme-date">📅 ${completedDate}</div>` : ''}
+                        </div>
+                    `;
+                });
+            } else {
+                completedThemesHtml = '<div class="no-completed-themes">Nog geen thema\'s afgerond</div>';
+            }
+            
+            // Combineer alles
+            let html = `
+                <div class="student-info">
+                    <h2>👤 ${currentStudent}</h2>
+                    <div class="progress-summary"></div>
+                </div>
+                <div class="main-layout">
+                    <div class="active-themes">
+                        ${activeThemesHtml}
+                    </div>
+                    <div class="completed-themes-sidebar">
+                        <h2>🏆 Afgeronde Thema's (${completedThemes.length})</h2>
+                        ${completedThemesHtml}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('content').innerHTML = html;
+            updateProgressSummary();
+        }
+        
+        function exportData() {
+            if (!currentStudent) {
+                alert('Selecteer eerst een leerling!');
+                return;
+            }
+            
+            const data = getStudentData(currentStudent);
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentStudent.replace(/\s+/g, '_')}_voortgang.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function exportAllStudents() {
+            const students = getStudentsList();
+            
+            if (students.length === 0) {
+                alert('Er zijn nog geen leerlingen om te exporteren!');
+                return;
+            }
+            
+            const allData = {
+                exportDate: new Date().toISOString(),
+                studentsList: students,
+                studentsData: {}
+            };
+            
+            students.forEach(student => {
+                allData.studentsData[student] = getStudentData(student);
+            });
+            
+            const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const dateStr = new Date().toISOString().split('T')[0];
+            a.download = `Alle_Leerlingen_${dateStr}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert(`${students.length} leerlingen succesvol geëxporteerd!`);
+        }
+        
+        function importAllStudents() {
+            if (!confirm('Let op: Dit vervangt NIET je huidige leerlingen, maar voegt nieuwe leerlingen toe. Wil je doorgaan?')) {
+                return;
+            }
+            
+            document.getElementById('importGroupFile').click();
+        }
+        
+        function importData() {
+            if (!currentStudent) {
+                alert('Selecteer eerst een leerling!');
+                return;
+            }
+            
+            document.getElementById('importFile').click();
+        }
+        
+        document.getElementById('importFile').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    saveStudentData(currentStudent, data);
+                    
+                    // Upload ook naar Firebase
+                    console.log('📤 Start upload naar Firebase...');
+                    let uploadCount = 0;
+                    
+                    for (const themeIdx in data) {
+                        for (const lessonIdx in data[themeIdx]) {
+                            await saveToFirebase(currentStudent, themeIdx, lessonIdx, data[themeIdx][lessonIdx]);
+                            uploadCount++;
+                        }
+                    }
+                    
+                    renderStudentProgress();
+                    alert(`Data succesvol geïmporteerd!\n${uploadCount} lessen geüpload naar Firebase.`);
+                } catch (err) {
+                    alert('Fout bij het importeren van data: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            
+            this.value = '';
+        });
+        
+        document.getElementById('importGroupFile').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (!importedData.studentsList || !importedData.studentsData) {
+                        throw new Error('Ongeldig bestandsformaat');
+                    }
+                    
+                    const currentStudents = getStudentsList();
+                    let addedCount = 0;
+                    let skippedCount = 0;
+                    let updatedCount = 0;
+                    let totalLessons = 0;
+                    
+                    // Eerst lokaal opslaan
+                    importedData.studentsList.forEach(student => {
+                        if (currentStudents.length + addedCount >= MAX_STUDENTS) {
+                            skippedCount++;
+                            return;
+                        }
+                        
+                        if (currentStudents.includes(student)) {
+                            saveStudentData(student, importedData.studentsData[student]);
+                            updatedCount++;
+                        } else {
+                            currentStudents.push(student);
+                            saveStudentData(student, importedData.studentsData[student]);
+                            addedCount++;
+                        }
+                    });
+                    
+                    if (addedCount > 0 || updatedCount > 0) {
+                        currentStudents.sort();
+                        saveStudentsList(currentStudents);
+                        updateStudentSelector();
+                    }
+                    
+                    // Dan uploaden naar Firebase
+                    console.log('📤 Start upload naar Firebase...');
+                    for (const studentName of importedData.studentsList) {
+                        if (currentStudents.includes(studentName)) {
+                            const studentData = importedData.studentsData[studentName];
+                            
+                            for (const themeIdx in studentData) {
+                                for (const lessonIdx in studentData[themeIdx]) {
+                                    await saveToFirebase(studentName, themeIdx, lessonIdx, studentData[themeIdx][lessonIdx]);
+                                    totalLessons++;
+                                }
+                            }
+                        }
+                    }
+                    
+                    let message = 'Import voltooid!\n\n';
+                    if (addedCount > 0) message += `✓ ${addedCount} nieuwe leerling(en) toegevoegd\n`;
+                    if (updatedCount > 0) message += `✓ ${updatedCount} leerling(en) bijgewerkt\n`;
+                    if (totalLessons > 0) message += `✓ ${totalLessons} lessen geüpload naar Firebase\n`;
+                    if (skippedCount > 0) message += `⚠ ${skippedCount} leerling(en) overgeslagen (maximum bereikt)`;
+                    
+                    alert(message);
+                    
+                    if (currentStudent) {
+                        renderStudentProgress();
+                    }
+                } catch (err) {
+                    alert('Fout bij het importeren: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            
+            this.value = '';
+        });
+        
+        function resetStudent() {
+            if (!currentStudent) {
+                alert('Selecteer eerst een leerling!');
+                return;
+            }
+            
+            if (confirm(`Weet je zeker dat je alle voortgang van ${currentStudent} wilt verwijderen?`)) {
+                saveStudentData(currentStudent, {});
+                renderStudentProgress();
+                alert('Voortgang is gereset!');
+            }
+        }
+        
+        // ===== JSONBIN.IO FUNCTIES =====
+        // ===== FIREBASE FIRESTORE FUNCTIES =====
+        
+        async function loadFromFirebase() {
+            console.log('🔄 Start laden van Firebase Firestore...');
+            updateStudentSelector();
+            
+            try {
+                const querySnapshot = await getDocs(collection(db, 'student_progress'));
+                console.log('📦 Data ontvangen:', querySnapshot.size, 'records');
+                
+                const studentsSet = new Set();
+                const studentsData = {};
+                
+                querySnapshot.forEach((docSnapshot) => {
+                    const record = docSnapshot.data();
+                    const studentName = record.studentName;
+                    studentsSet.add(studentName);
+                    
+                    if (!studentsData[studentName]) {
+                        studentsData[studentName] = {};
+                    }
+                    
+                    if (!studentsData[studentName][record.themeIndex]) {
+                        studentsData[studentName][record.themeIndex] = {};
+                    }
+                    
+                    studentsData[studentName][record.themeIndex][record.lessonIndex] = {
+                        book: record.bookCompleted,
+                        online: record.laptopCompleted,
+                        completedDate: record.completedDate,
+                        timestamp: record.timestamp
+                    };
+                });
+                
+                const studentsList = Array.from(studentsSet).sort();
+                localStorage.setItem('studentsList', JSON.stringify(studentsList));
+                
+                Object.keys(studentsData).forEach(student => {
+                    const key = `student_${student}`;
+                    localStorage.setItem(key, JSON.stringify(studentsData[student]));
+                });
+                
+                updateStudentSelector();
+                
+                if (currentStudent) {
+                    renderStudentProgress();
+                }
+                
+                console.log('✅ Data geladen van Firebase:', studentsList.length, 'leerlingen');
+                
+            } catch (error) {
+                console.error('❌ Fout bij laden van Firebase:', error);
+            }
+        }
+        
+        async function saveToFirebase(studentName, themeIndex, lessonIndex, lessonData) {
+            if (isSyncing) return;
+            isSyncing = true;
+            
+            try {
+                const docId = `${studentName}_${themeIndex}_${lessonIndex}`;
+                const docRef = doc(db, 'student_progress', docId);
+                
+                const record = {
+                    studentName: studentName,
+                    themeIndex: parseInt(themeIndex),
+                    lessonIndex: parseInt(lessonIndex),
+                    bookCompleted: lessonData.book || false,
+                    laptopCompleted: lessonData.online || false,
+                    completedDate: lessonData.completedDate || null,
+                    timestamp: lessonData.timestamp || null,
+                    updatedAt: new Date()
+                };
+                
+                await setDoc(docRef, record);
+                console.log('✅ Opgeslagen naar Firebase');
+                
+            } catch (error) {
+                console.error('Firebase sync error:', error);
+            } finally {
+                isSyncing = false;
+            }
+        }
+        
+        async function deleteStudentFromFirebase(studentName) {
+            try {
+                const q = query(collection(db, 'student_progress'), where('studentName', '==', studentName));
+                const querySnapshot = await getDocs(q);
+                
+                const batch = writeBatch(db);
+                querySnapshot.forEach((docSnapshot) => {
+                    batch.delete(docSnapshot.ref);
+                });
+                
+                await batch.commit();
+                console.log('✅ Leerling verwijderd uit Firebase');
+                
+            } catch (error) {
+                console.error('Firebase delete error:', error);
+            }
+        }
+        
+        async function renameStudentInFirebase(oldName, newName) {
+            try {
+                const q = query(collection(db, 'student_progress'), where('studentName', '==', oldName));
+                const querySnapshot = await getDocs(q);
+                
+                const batch = writeBatch(db);
+                querySnapshot.forEach((docSnapshot) => {
+                    const record = docSnapshot.data();
+                    const newDocId = `${newName}_${record.themeIndex}_${record.lessonIndex}`;
+                    const newDocRef = doc(db, 'student_progress', newDocId);
+                    
+                    batch.set(newDocRef, {
+                        ...record,
+                        studentName: newName,
+                        updatedAt: new Date()
+                    });
+                    
+                    batch.delete(docSnapshot.ref);
+                });
+                
+                await batch.commit();
+                console.log('✅ Naam gewijzigd in Firebase');
+                
+            } catch (error) {
+                console.error('Firebase rename error:', error);
+            }
+        }
+        
+        // ===== MAAK FUNCTIES GLOBAAL VOOR ONCLICK HANDLERS =====
+        // Dit is nodig omdat we type="module" gebruiken voor Firebase
+        window.addStudent = addStudent;
+        window.deleteStudent = deleteStudent;
+        window.renameStudent = renameStudent;
+        window.resetStudent = resetStudent;
+        window.exportData = exportData;
+        window.importData = importData;
+        window.exportAllStudents = exportAllStudents;
+        window.importAllStudents = importAllStudents;
+        window.toggleTheme = toggleTheme;
+    </script>
 </body>
 </html>
